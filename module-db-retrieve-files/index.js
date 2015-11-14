@@ -1,0 +1,469 @@
+var https = require('https');
+var AWS = require("aws-sdk");
+var marked = require("marked");
+var Evernote = require('evernote').Evernote;
+var yaml = require('yaml-front-matter');
+var moment = require('moment');
+
+AWS.config.update({
+  region: "us-east-1",
+  //endpoint: "http://localhost:8000"
+});
+
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  xhtml: true
+});
+
+var dynamodb = new AWS.DynamoDB();
+
+exports.handler = function(event, context) {
+
+  main(event.UserId, function(err, data) {
+    if (err) {
+      console.log("Error in main(): " + err);
+    }
+
+    context.succeed(data);
+
+    context.done( );
+
+  });
+
+}
+
+/*
+----------
+Vars and Objects
+*/
+
+function User(dropboxUserId, dropboxFileCursor, dropboxAuthToken, evernoteAuthToken) {
+    this.dropboxUserId = dropboxUserId;
+    this.dropboxFileCursor = dropboxFileCursor;
+    this.dropboxAuthToken = dropboxAuthToken;
+    this.evernoteAuthToken = evernoteAuthToken;
+}
+
+function Note(title, guid, tags, body) {
+  this.title = title;
+  this.guid = guid;
+  this.tags = tags;
+  this.body = body;
+}
+
+/*
+----------
+*/
+
+
+function _getChangedFiles(path, postData, authToken, callback) {
+
+  var _return = '';
+
+  //set options to call dropbox api
+  var options = {
+    hostname: 'api.dropboxapi.com',
+    path: path,
+    port: 443,
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + authToken,
+      'Content-Type': 'application/json'
+    }
+  }
+
+  var req = https.request(options, function(res) {
+    res.setEncoding('utf8');
+
+    res.on('data', function(chunk) {
+      callback(null, chunk);
+    });
+
+    res.on('error', function(err) {
+      callback(new Error(err));
+    });
+
+  });
+
+  //write data to request body
+  req.write(postData);
+  req.end();
+
+}
+
+function _downloadFile(path, file, authToken, callback) {
+  var _return = '';
+
+  //set options to call dropbox api
+  var options = {
+    hostname: 'content.dropboxapi.com',
+    path: path,
+    port: 443,
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + authToken,
+      'Dropbox-API-Arg': file
+    }
+  }
+
+  var req = https.request(options, function(res) {
+    res.setEncoding('utf8');
+
+    res.on('data', function(chunk) {
+      callback(null, chunk);
+    });
+
+    res.on('error', function(err) {
+      callback(new Error(err));
+    });
+
+  });
+
+  //write data to request body
+  req.write('');
+  req.end();
+
+}
+
+function getUser(dropboxUserId, callback) {
+
+  var params = {
+    TableName : "DropboxEvernoteUser",
+    Key: {
+      "DropboxUserId": {
+        "N": dropboxUserId.toString()
+      }
+    }
+  };
+
+  dynamodb.getItem(params, function(err, data) {
+    if (err) {
+      callback(new Error(err));
+    }
+    else {
+      callback(null, data);
+    }
+  });
+
+}
+
+function getDropboxEvernoteFile(dropboxFileId, callback) {
+
+  var params = {
+    TableName: "DropboxEvernoteFile",
+    Key: {
+      "DropboxFileId": {
+        "S": dropboxFileId
+      }
+    }
+  };
+
+  dynamodb.getItem(params, function(err, data) {
+    if (err) {
+      callback(new Error(err));
+    }
+    else {
+      callback(null, data);
+    }
+  });
+
+}
+
+
+function insertDropboxEvernoteFile(dropboxFileId, evernoteGuid, callback) {
+
+  var params = {
+    TableName: "DropboxEvernoteFile",
+    Item: {
+      "DropboxFileId": {"S": dropboxFileId},
+      "EvernoteGuid": {"S": evernoteGuid}
+    }
+  }
+
+  dynamodb.putItem(params, function(err, data) {
+    if (err)
+      callback(new Error(err));
+    else
+      callback(null, data);
+  });
+
+}
+
+function updateCursor(dropboxFileId, dropboxFileCursor, callback) {
+
+  var params = {
+    TableName: "DropboxEvernoteUser",
+    Key: {
+      "DropboxUserId": {
+        "N": dropboxFileId.toString()
+      }
+    },
+    UpdateExpression: "SET DropboxFileCursor = :cursor",
+    ExpressionAttributeValues: {
+      ":cursor": {
+       "S": dropboxFileCursor
+      }
+    },
+    ReturnValues: "UPDATED_NEW"
+  };
+
+
+  dynamodb.updateItem(params, function(err, data) {
+    if (err)
+      callback(new Error(err));
+    else
+      callback(null, data);
+  });
+}
+
+
+
+//call DropBox with the authToken and cursor and retrive list of recently modified files
+function getChangedFiles(cursor, authToken, callback) {
+
+  _path = '/2/files/list_folder/continue';
+  _cursor = '{\"cursor\": \"' + cursor + '\"}';
+  _authToken = authToken;
+
+  _getChangedFiles(_path, _cursor, _authToken, function(err, data) {
+    if (err) {
+      callback(new Error('Error in _getChangedFiles: ' + err));
+      return;
+    }
+
+    callback(null, data);
+  });
+
+}
+
+function downloadFile(fileName, authToken, callback) {
+  _path = '/2/files/download';
+  _file = '{\"path\": \"' + fileName + '\"}';
+
+  _downloadFile(_path, _file, authToken, function(err, data) {
+    if (err) {
+      callback(new Error("Error in _downloadFile: " + err))
+      return;
+    }
+
+    callback(null, data);
+  })
+}
+
+/*
+  In case a title was not specified in the YAML,
+  Get the first 30 chars of the first line of content
+*/
+function getTitle(content) {
+  var title = 'nada';
+
+  if (content === '') {
+    title = 'New Note Created at ' + moment().format('MMMM Do YYYY, h:mm:ss a');
+  }
+  else if (content.length < 30) {
+    title = content;
+  }
+  else {
+    content = content.slice(0, 30);
+
+    if (content.indexOf('\n') < 30)
+      content = content.slice(0, content.indexOf('\n'));
+
+    title = content;
+  }
+
+  return title;
+}
+
+/*
+  Get note title, guid, tags, body.
+  This metadata must be at the top of the text file
+*/
+function parseNote(content) {
+
+  var note = new Note();
+  var doc = yaml.loadFront(content);
+
+  if (doc.title != undefined)
+    note.title = doc.title;
+  else { //auto generate note title and write new title into YAML metadata
+    note.title = getTitle(doc.__content);
+  }
+
+  if (doc.tags != undefined)
+    note.tags = doc.tags;
+
+  note.body = doc.__content.trim();
+
+  return note;
+
+}
+
+function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
+
+  console.log('entering sendToEvernote');
+
+  var nBodyHead = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                  "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">" +
+                  "<en-note>";
+  var nBodyFoot = "</en-note>";
+
+  //parse YAML out of head
+  var note = parseNote(data);
+
+  //convert markdown to HTML
+  if (note.body != undefined) {
+    note.body = marked(note.body);
+
+    //remove id tags (which were inserted by the marked() function)
+    note.body = note.body.replace(new RegExp(' id="[^\"]*"', 'g'), '');
+
+    console.log('note body: ' + note.body);
+
+  }
+
+
+  var client = new Evernote.Client({token: evernoteAuthToken});
+  var noteStore = client.getNoteStore();
+
+  var newNote = new Evernote.Note();
+  newNote.title = note.title;
+  newNote.content = nBodyHead + note.body + nBodyFoot;
+
+  console.log('newNote: ' + JSON.stringify(newNote));
+
+  //if Dropbox File Id and Evernote Guid are in database, this is an update
+  getDropboxEvernoteFile(dropboxFileId, function(err, fileData) {
+    if (err) {
+      console.log('Error in getDropboxEvernoteFile(): ' + err);
+      return;
+    }
+
+    console.log('updating file');
+
+    if (fileData.Item != undefined) { //update existing note
+      note.guid = fileData.Item.EvernoteGuid.S;
+      newNote.guid = fileData.Item.EvernoteGuid.S;
+
+      noteStore.updateNote(newNote, function(err, evernote) {
+        if (err) {
+          console.log('Error in updateNote: ' + err);
+          return evernote;
+        }
+
+        console.log('successfully updated note ' + dropboxFileId);
+        return note;
+      });
+
+    }
+    else { //insert new note
+
+      console.log('creating new file');
+
+      //attempt to create note in evernote account
+      noteStore.createNote(newNote, function(err, evernote) {
+        if (err) {
+          console.log('Error in createNote: ' + err);
+          console.log('evernote: ' + JSON.stringify(evernote));
+          return;
+        }
+
+        note.guid = evernote.guid;
+
+        //save this id/guid to the DropboxEvernote table so it can be updated in the future
+        insertDropboxEvernoteFile(dropboxFileId, note.guid, function(err, data) {
+          if (err) {
+            console.log('error in insertDropboxEvernoteFile: ' + err);
+          }
+
+          //if no error, return successfully
+          return note;
+        });
+
+
+      });
+
+    }
+  });
+
+}
+
+function main(dropboxUserId, callback) {
+
+  var user = new User();
+  user.dropboxUserId = dropboxUserId;
+
+  //get the auth_token and cursor for the user
+  getUser(user.dropboxUserId, function(err, userData) {
+    if (err) {
+      console.log("Error in getUser: " + err);
+      return;
+    }
+
+    console.log('userData: ' + JSON.stringify(userData));
+
+    user.dropboxFileCursor = userData.Item.DropboxFileCursor.S;
+    user.dropboxAuthToken = userData.Item.DropboxAuthToken.S;
+    user.evernoteAuthToken = userData.Item.EvernoteAuthToken.S;
+
+    //call db and get files that have changed since last cursor was retrieved
+    getChangedFiles(user.dropboxFileCursor, user.dropboxAuthToken, function(err, filesData) {
+      if (err) {
+        console.log("Error in getChangedFiles: " + err);
+        return;
+      }
+
+      console.log('filesData: ' + JSON.stringify(filesData));
+
+      filesData = JSON.parse(filesData);
+
+      //loop through entries and download file contents
+      for (entry in filesData.entries) {
+
+        if (filesData.entries[entry].id != undefined) {
+
+          _thisFile = filesData.entries[entry];
+
+          //call dropbox and retrieve file
+          downloadFile(_thisFile.path_lower, user.dropboxAuthToken, function(err, fileContent) {
+            if (err) {
+              console.log("Error in downloadFile: " + err);
+              return;
+            }
+
+            //if .md or .txt, process as markdown and send to evernote
+            _ext = _thisFile.path_lower.slice(-3);
+            if (_ext === 'txt' || _ext === '.md') {
+
+              //convert markdown to html, process file at Evernote
+              sendToEvernote(fileContent, _thisFile.id, user.evernoteAuthToken, function(err, note) {
+                if (err) {
+                  console.log('Error in sendToEvernote: ' + err);
+                  return;
+                }
+
+              });
+
+            }
+            else { //else send to evernote as an attachment
+              callback("Not .txt or .md");
+            }
+
+          });
+        }
+
+      }
+
+      //update dropbox cursor
+      updateCursor(user.dropboxUserId, filesData.cursor, function(err, data) {
+        if (err) {
+          throw(new Error("Error in updateCursor(): " + err));
+        }
+      });
+
+    });
+
+  });
+
+}

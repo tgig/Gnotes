@@ -1,0 +1,22 @@
+{
+  "engines": {
+    "node": "4.2.1"
+  },
+  "name": "aws-lambda",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {
+    "aws-sdk": "^2.2.10",
+    "evernote": "^1.25.82",
+    "marked": "^0.3.5",
+    "moment": "^2.10.6",
+    "yaml-front-matter": "^3.2.3"
+  }
+}
