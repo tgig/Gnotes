@@ -1,5 +1,7 @@
 # Markdown to Evernote
 
+## Not ready for primetime, still under development
+
 Uses Dropbox, Evernote, AWS Lambdas, and AWS DynamoDB.
 
 Connect your Dropbox and Evernote account. Save a markdown file into the Dropbox folder and it will sync to Evernote.
