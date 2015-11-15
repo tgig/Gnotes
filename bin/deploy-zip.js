@@ -1,3 +1,15 @@
+/*
+
+  deploy-zip.js
+
+  This script packages up a Lambda, zips it, and puts into the /bin/zipped_lambda folder
+  It can then be uploaded to AWS manually
+
+  Pass in the folder name of the AWS Lambda function
+  node bin/deploy-zip test-folder
+
+*/
+
 var exec = require("child_process").exec;
 var os = require("os");
 var fs = require("fs");
@@ -15,7 +27,7 @@ function prepDirs(callback) {
   exec('rm -r ' + tmpDir);
 
   //delete what is currently in zipped_lambda dir
-  exec('rm -r ./zipped_lambda/*');
+  exec('rm -r ./bin/zipped_lambda/*');
 
   //make temp directory, copy lambda
   exec('mkdir ' + tmpDir);
@@ -43,38 +55,26 @@ function copyLambda(dirToZip, callback) {
     }
 
     prepDirs(function () {
-      exec('cp ' + dirToZip + '/index.js ' + tmpDir + 'index.js');
-
-      //copy all node_modules to temp folder
-      //TO DO: only get the node_modules required by this specific lambda
-      files = fs.readdirSync(process.cwd() + '/node_modules');
-      //fs.readdirSync(process.cwd() + '/node_modules', function(err, files) {
-
-        for (var file in files) {
-
-          if (files[file] != '.bin' && files[file] != 'aws-sdk') {
-
-            var filePath = currentDir + '/node_modules/' + files[file];
-            var stat = fs.statSync(filePath);
-            //fs.stat(filePath, function(err, stat) {
-
-              if (stat.isDirectory()) {
-                console.log('copied folder ' + filePath);
-                exec('cp -r ' + filePath + ' ' + tmpDir + '/node_modules');
-              }
-              else {
-                console.log(filePath + ' is not a folder');
-              }
-            //});
-
-          }
-
+      exec('cp ' + dirToZip + '/index.js ' + tmpDir + 'index.js', function(err, stdout, stderr) {
+        if (err) {
+          console.log('error when copying index.js: ' + err);
         }
 
+        console.log('Copied ' + dirToZip + '/index.js >> to >> ' + tmpDir + 'index.js');
 
-      //});
+        //copy all node_modules to temp folder
+        exec('cp -r ' + currentDir + '/node_modules ' + tmpDir, function(err, stdout, stderr) {
+          if (err) {
+            console.log('error when copying /node_modules: ' + err);
+          }
 
-      callback(null);
+          //now delete the aws-sdk folder
+          exec('rm -r ' + tmpDir + '/node_modules/aws-sdk')
+
+          callback(null);
+        });
+      });
+
 
     });
 
@@ -82,6 +82,8 @@ function copyLambda(dirToZip, callback) {
   });
 
 }
+
+
 
 copyLambda(dirToZip, function(err) {
   if (err) {
@@ -92,7 +94,7 @@ copyLambda(dirToZip, function(err) {
 
   //zip contents of temp directory (first need to navigate to temp dir)
   //  into this dir ./zipped_lambda dir
-  exec('cd ' + tmpDir + '; zip -roq ' + currentDir + '/zipped_lambda/' + dirToZip + '.zip .');
+  exec('cd ' + tmpDir + '; zip -roq ' + currentDir + '/bin/zipped_lambda/' + dirToZip + '.zip .');
   console.log('success');
 });
 

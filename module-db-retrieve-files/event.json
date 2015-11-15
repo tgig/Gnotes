@@ -1,3 +1,22 @@
 {
-  "UserId": 25802399
+    "Records": [
+        {
+            "EventSource": "aws:sns",
+            "EventVersion": "1.0",
+            "EventSubscriptionArn": "arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update:2415ee35-ed71-47e8-971f-2c9705dc426a",
+            "Sns": {
+                "Type": "Notification",
+                "MessageId": "9f4343d1-c3aa-5803-b32c-0d10287411c7",
+                "TopicArn": "arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update",
+                "Subject": null,
+                "Message": "25802399",
+                "Timestamp": "2015-11-15T02:10:38.151Z",
+                "SignatureVersion": "1",
+                "Signature": "DSGNPvG6jtmzNaqML2KCSWRVWTcWN1lRuLPJgzEnzsFWinAzT6TgCgOs51SYudvt5iCxr0uTmaNJvC0buNiTxBGesOgGTR9iwjsohW4MAKT6d+0Cpn3OnH3c808vsO62+PkxFBthtpW85YtZTabTRNRkYKGUuIR87E6V6mucCIKlsLL8+xsDkoDPXAX/3bqy2oz6mcBA+uO8eszagjhGBIXCJ97Flh/f6Lho/YrlSlwwmPU4CptexbLGw4/GA4hxkLDwdzGt0RCEfVoV4+dJutHe0CtQjJY0vJoxsfs74dUFpIx2kINim3nNgZUJ2dvbZAuY+m/ikMLUvS0BVmbReA==",
+                "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-bb750dd426d95ee9390147a5624348ee.pem",
+                "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update:2415ee35-ed71-47e8-971f-2c9705dc426a",
+                "MessageAttributes": {}
+            }
+        }
+    ]
 }
