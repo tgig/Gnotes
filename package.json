@@ -2,14 +2,11 @@
   "engines": {
     "node": "4.2.1"
   },
-  "name": "aws-lambda",
+  "name": "Markdown-to-Evernote",
   "version": "0.0.1",
-  "description": "",
+  "description": "Save a markdown file to Dropbox, it instantly saves to Evernote.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
+  "author": "Travis Giggy",
   "license": "ISC",
   "devDependencies": {},
   "dependencies": {
