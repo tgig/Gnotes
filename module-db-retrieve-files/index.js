@@ -261,17 +261,18 @@ function downloadFile(fileName, authToken, callback) {
 */
 function getTitle(content) {
   var title = 'nada';
+  var _length = 255;
 
   if (content === '') {
     title = 'New Note Created at ' + moment().format('MMMM Do YYYY, h:mm:ss a');
   }
-  else if (content.length < 30) {
+  else if (content.length < _length) {
     title = content;
   }
   else {
-    content = content.slice(0, 30);
+    content = content.slice(0, _length);
 
-    if (content.indexOf('\n') < 30)
+    if (content.indexOf('\n') < _length)
       content = content.slice(0, content.indexOf('\n'));
 
     title = content;
@@ -281,8 +282,7 @@ function getTitle(content) {
 }
 
 /*
-  Get note title, guid, tags, body.
-  This metadata must be at the top of the text file
+  Get note title, guid, tags, body, if it exists
 */
 function parseNote(content) {
 
