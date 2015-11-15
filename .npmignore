@@ -1,4 +1,8 @@
-event.json
-Gruntfile.js
-dist
-*.iml
+# Learn more about ignoring files: https://help.github.com/articles/ignoring-files
+
+# Ignore generated output from the source code repository.
+# Instead, push it to its own upstream repository (eg. Github pages).
+output
+
+# Ignore npm package dependencies
+node_modules

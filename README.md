@@ -13,3 +13,15 @@ Works like this:
 3. AWS Lambda queues a job in SNS, which is connected to another AWS Lambda
 4. Lambda #2 grabs the file from Dropbox, converts it to ENML, uploads to Evernote
 
+* * *
+
+## Website
+
+Built with [Punch](https://github.com/laktek/punch)
+
+```
+git clone (this repo)
+npm install -g punch
+punch s
+```
+
