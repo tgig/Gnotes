@@ -1,0 +1,8 @@
+{
+	"site-title": "Markdown to Evernote",
+	"navbar": [
+    { "label": "Home", "href": "#", "active": " active" },
+    { "label": "Features", "href": "#", "active": "" },
+    { "label": "Contact", "href": "#", "active": "" }
+	]
+}

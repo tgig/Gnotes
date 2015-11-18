@@ -1,0 +1,14 @@
+body {
+  font-family: 'Inconsolata';
+}
+
+h1.cover-heading {
+  color: #f09a3d;
+}
+
+p.mdbold {
+  color: #e44e7a;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-style: italic;
+}
