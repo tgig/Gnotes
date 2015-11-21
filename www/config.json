@@ -12,5 +12,14 @@
 			"/css/bootstrap.css",
 			"/css/site.css"
 		]
+	},
+
+	"plugins": {
+		"helpers": {
+			"test_page_helper": "./lib/helpers/cors_headers.js"
+		}
+
 	}
+
+
 }
