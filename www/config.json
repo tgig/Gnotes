@@ -10,7 +10,6 @@
 	"bundles": {
 		"/css/all.css": [
 			"/css/bootstrap.css",
-			"/css/cover.css",
 			"/css/site.css"
 		]
 	}

@@ -1,14 +1,31 @@
+html {
+  background-color: #222222;
+}
 body {
   font-family: 'Inconsolata';
+  background-color: #222222;
+  color: #fffef7;
+}
+
+.container {
+  max-width: 680px;
+}
+
+.navbar {
+  padding-left: 0;
+  margin-bottom: 20px;
+}
+.navbar .navbar-brand {
+  color: #dcdcdc;
+  font-size: 1.5rem;
+  padding-top: 0;
 }
 
 h1.cover-heading {
   color: #f09a3d;
+
 }
 
-p.mdbold {
+.font-color-bold {
   color: #e44e7a;
-  font-size: 1.5rem;
-  font-weight: bold;
-  font-style: italic;
 }

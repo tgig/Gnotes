@@ -21,21 +21,14 @@
 
   <body>
 
-    <div class="site-wrapper">
+    <div class="container">
 
-      <div class="site-wrapper-inner">
+      <nav class="navbar">
+        <a class="navbar-brand" href="/">{{site-title}}</a>
 
-        <div class="cover-container">
-
-          <div class="masthead clearfix">
-            <div class="inner">
-              <h3 class="masthead-brand">Cover</h3>
-              <nav class="nav nav-masthead">
-              	{{#navbar}}
-									<a class="nav-link{{active}}" href="{{{href}}}">{{label}}</a>
-								{{/navbar}}
-              </nav>
-            </div>
-          </div>
-
-          <div class="inner cover">
+        <ul class="nav nav-pills pull-right">
+          {{#navbar}}
+            <li class="nav-item{{active}}"><a class="nav-link" href="{{{href}}}">{{label}}</a></li>
+          {{/navbar}}
+        </ul>
+      </nav>
