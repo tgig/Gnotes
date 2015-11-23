@@ -14,17 +14,47 @@
       $('#dropboxButton').addClass('disabled');
 
       postData = {
-        code: code,
-        grant_type: "authorization_code",
-        client_id: "1234",
-        client_secret: "hello",
-        redirect_uri: "http://localhost:9009"
+        "code": code
       }
 
-      //can I retrieve token from dropbox from the client side?
-      $.post('https://api.dropboxapi.com/1/oauth2/token', { code: code, grant_type: "authorization_code" }, function(data) {
-        alert('data: ' + data);
+      $.ajax({
+        url: 'https://hir9ezqm9l.execute-api.us-east-1.amazonaws.com/prod/get-dropbox-token',
+        method: 'POST',
+        contentType:"application/json; charset=utf-8",
+        dataType:"json",
+        data: JSON.stringify(postData)
       })
+      .done(function(data) {
+        console.log('success');
+        console.log('data: ' + JSON.stringify(data));
+      })
+      .fail(function(err) {
+        console.log( "error" );
+        console.log("error: " + JSON.stringify(err));
+      })
+      .always(function() {
+        console.log( "complete" );
+      });
+
+      function callme(data) {
+        console.log('callme');
+        console.log(data);
+      }
+
+      /*
+
+
+      ,
+        success: function(data) {
+          console.log('success');
+          console.log('data: ' + JSON.stringify(data));
+        },
+        fail: function(data) {
+          console.log('error');
+          console.log(data);
+        }
+      */
+
     }
   });
 
