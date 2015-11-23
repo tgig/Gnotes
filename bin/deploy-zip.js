@@ -62,17 +62,24 @@ function copyLambda(dirToZip, callback) {
 
         console.log('Copied ' + dirToZip + '/index.js >> to >> ' + tmpDir + 'index.js');
 
-        //copy all node_modules to temp folder
-        exec('cp -r ' + currentDir + '/node_modules ' + tmpDir, function(err, stdout, stderr) {
-          if (err) {
-            console.log('error when copying /node_modules: ' + err);
-          }
+        //copy .env file to temp folder
+        exec('cp ' + currentDir + '/.env ' + tmpDir + '.env', function(err, stdout, stderr) {
 
-          //now delete the aws-sdk folder
-          exec('rm -r ' + tmpDir + '/node_modules/aws-sdk')
+          //copy all node_modules to temp folder
+          exec('cp -r ' + currentDir + '/node_modules ' + tmpDir, function(err, stdout, stderr) {
+            if (err) {
+              console.log('error when copying /node_modules: ' + err);
+            }
 
-          callback(null);
+            //now delete the aws-sdk & punch folders
+            exec('rm -r ' + tmpDir + '/node_modules/aws-sdk');
+            exec('rm -r ' + tmpDir + '/node_modules/punch');
+
+            callback(null);
+          });
+
         });
+
       });
 
 
