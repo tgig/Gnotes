@@ -11,10 +11,12 @@
   "devDependencies": {},
   "dependencies": {
     "aws-sdk": "^2.2.10",
+    "dotenv": "^1.2.0",
     "evernote": "^1.25.82",
     "marked": "^0.3.5",
     "moment": "^2.10.6",
     "punch": "^0.5.46",
+    "request": "^2.67.0",
     "yaml-front-matter": "^3.2.3"
   }
 }
