@@ -55,10 +55,15 @@ function Note(title, guid, tags, body) {
 }
 
 /*
+End - Vars and Objects
 ----------
 */
 
 
+/*
+--------------
+API operations
+*/
 function _getChangedFiles(path, postData, authToken, callback) {
 
   var _return = '';
@@ -127,7 +132,15 @@ function _downloadFile(path, file, authToken, callback) {
   req.end();
 
 }
+/*
+End - API operations
+--------------
+*/
 
+/*
+--------------
+Database operations
+*/
 function getUser(dropboxUserId, callback) {
 
   console.log('In getUser(), dropboxUserId: ' + dropboxUserId);
@@ -220,7 +233,10 @@ function updateCursor(dropboxFileId, dropboxFileCursor, callback) {
       callback(null, data);
   });
 }
-
+/*
+End - Database operations
+--------------
+*/
 
 
 //call DropBox with the authToken and cursor and retrive list of recently modified files
@@ -257,7 +273,7 @@ function downloadFile(fileName, authToken, callback) {
 
 /*
   In case a title was not specified in the YAML,
-  Get the first 30 chars of the first line of content
+  Get the first 255 chars of the first line of content
 */
 function getTitle(content) {
   var title = 'nada';
