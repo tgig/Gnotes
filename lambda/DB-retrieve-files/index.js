@@ -356,9 +356,13 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
       throw('Error in getDropboxEvernoteFile(): ' + err);
     }
 
-    console.log('updating file');
+    console.log('fileData.Item: ' + JSON.stringify(fileData.Item));
 
     if (fileData.Item != undefined) { //update existing note
+
+      console.log('Updating existing file');
+      console.log('EvernoteGuid: ' + fileData.Item.EvernoteGuid.S);
+
       note.guid = fileData.Item.EvernoteGuid.S;
       newNote.guid = fileData.Item.EvernoteGuid.S;
 
@@ -366,6 +370,8 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
         if (err) {
           throw('Error in updateNote: ' + err);
         }
+
+        console.log('Successfully updated file');
 
         callback();
       });

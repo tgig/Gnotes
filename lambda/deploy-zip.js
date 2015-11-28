@@ -54,7 +54,7 @@ function copyLambda(moduleName, callback) {
   //if the passed in directory does not exist, then throw an error
   fs.exists(dirToZip, function(exists) {
     if (!exists) {
-      console.log('huh? ' + exists);
+      console.log('# huh? ' + exists);
       callback('The directory you passed in does not exist. Casing matters.');
     }
 
@@ -67,7 +67,7 @@ function copyLambda(moduleName, callback) {
           throw('error when copying index.js: ' + err);
         }
 
-        console.log('Copied ' + dirToZip + 'index.js >> to >> ' + tmpDir + 'index.js');
+        console.log('# Copied ' + dirToZip + 'index.js >> to >> ' + tmpDir + 'index.js');
 
         //copy .env file to temp folder (it is in the parent dir, so need to do some fancy footwork)
         exec('cd ' + currentDir + '; cd ..; cp .env ' + tmpDir + '.env', function(err, stdout, stderr) {
@@ -75,7 +75,7 @@ function copyLambda(moduleName, callback) {
               throw('Error when copying .env: ' + err);
             }
 
-          console.log('Copied .env file to temp dir');
+          console.log('# Copied .env file to temp dir');
 
           //copy all node_modules to temp folder
           exec('cd ' + currentDir + '; cd ..; cp -r node_modules ' + tmpDir, function(err, stdout, stderr) {
@@ -83,7 +83,7 @@ function copyLambda(moduleName, callback) {
               throw('error when copying /node_modules: ' + err);
             }
 
-            console.log('Copied /node_modules to temp dir');
+            console.log('# Copied /node_modules to temp dir');
 
             //now delete the aws-sdk & punch folders
             exec('rm -r ' + tmpDir + '/node_modules/aws-sdk', function() {
@@ -109,7 +109,7 @@ function copyLambda(moduleName, callback) {
 }
 
 function zipFiles(callback) {
-  console.log('zipFiles: cd ' + tmpDir + '; zip -roq ' + zippedLambdaDir + moduleName + '.zip .');
+  console.log('# zipFiles: cd ' + tmpDir + '; zip -roq ' + zippedLambdaDir + moduleName + '.zip .');
   //throw('done');
 
   exec('cd ' + tmpDir + '; zip -roq ' + zippedLambdaDir + moduleName + '.zip .', function(err, stdout, stderr) {
@@ -117,7 +117,7 @@ function zipFiles(callback) {
       throw('Error when zipping files to zipped_lambda dir: ' + err);
     }
 
-    console.log('Created zip in zipped_lambda');
+    console.log('# Created zip in zipped_lambda');
 
     callback();
   });
@@ -134,7 +134,7 @@ copyLambda(moduleName, function(err) {
   //  into ./zipped_lambda dir
   zipFiles( function(err, data) {
 
-    console.log('Deploying to AWS Lambda...');
+    console.log('# Deploying to AWS Lambda...');
 
     //now upload the zip file to AWS and publish
     //aws lambda update-function-code --function-name "DB-retrieve-token" --zip-file fileb://bin/zipped_lambda/module-db-get-auth-token.zip --publish
@@ -143,9 +143,8 @@ copyLambda(moduleName, function(err) {
         throw('Error when transferring zip file to AWS: ' + err);
       }
 
-      console.log('tmpDir: ' + tmpDir);
-      console.log('Copied zip file to zipped_lambda dir');
-      console.log('Done');
+      console.log('# tmpDir: ' + tmpDir);
+      console.log('# Done');
     });
 
 

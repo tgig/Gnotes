@@ -2,16 +2,18 @@
 this will accept a code,
 request a token,
 save a new user (or update an existing user)
+get appropriate link for Evernote auth
 */
 
 var request = require("request");
 var AWS = require("aws-sdk");
+var Evernote = require('evernote').Evernote;
 require("dotenv").load();
 
 
 exports.handler = function(event, context) {
-  main(event.code, function (err, data) {
-    context.succeed({"success": data});
+  main(event.code, function (err, returnData) {
+    context.succeed(returnData);
   });
 }
 
@@ -19,6 +21,7 @@ exports.handler = function(event, context) {
 ----------
 Vars and Objects
 */
+var callbackUrl = 'http://localhost:9009';
 var dynamodb = new AWS.DynamoDB();
 
 function User(dropboxUserId, dropboxFileCursor, dropboxAuthToken, evernoteAuthToken) {
@@ -43,7 +46,7 @@ function getDropboxToken(code, callback) {
     form: {
       code: code,
       grant_type: 'authorization_code',
-      redirect_uri: 'http://localhost:9009'
+      redirect_uri: callbackUrl
     },
     auth: {
       user: process.env.aws_client_id,
@@ -53,11 +56,15 @@ function getDropboxToken(code, callback) {
 
   // exchange access code for bearer token
   request.post(postUrl, postData, function (error, response, body) {
-    var data = JSON.parse(body);
 
-    if (data.error) {
-      throw('Error getting dropbox bearer token: ' + data.error);
+    if (error) {
+      throw('Error getting dropbox bearer token: ' + error);
     }
+    else if (response.statusCode == 400) {
+      throw('Error getting dropbox bearer token. Response body: ' + response.body);
+    }
+
+    var data = JSON.parse(body);
 
     // extract bearer token
     var dropboxToken = data.access_token;
@@ -68,13 +75,38 @@ function getDropboxToken(code, callback) {
 
     //update/insert into database
     saveDropboxToken(dropboxUserId, dropboxToken, function(err, data) {
+      if (err) {
+        throw('Error when saving dropbox token: ' + err);
+      }
 
-      callback(null, data);
+      callback(null, dropboxUserId);
 
     });
 
   });
 
+}
+
+function getEvernoteOAuthLink(callback) {
+  var client = new Evernote.Client ({
+    consumerKey: process.env.evernote_consumer_key,
+    consumerSecret: process.env.evernote_consumer_secret,
+    sandbox: true
+  });
+
+  client.getRequestToken(callbackUrl, function(err, oauthToken, oauthSecret, results){
+    if(err) {
+      throw('Error in getEvernoteOAuthLink: ' + err);
+    }
+    else {
+      enData = {
+        oauthToken: oauthToken,
+        oauthSecret: oauthSecret,
+        authorizeUrl: client.getAuthorizeUrl(oauthToken)
+      }
+      callback(null, enData);
+    }
+  });
 }
 
 /*
@@ -126,7 +158,21 @@ function main(code, callback) {
 
   var user = new User();
 
-  getDropboxToken(code, function(err, dropboxTokenData) {
-    callback(null, "success");
+  getDropboxToken(code, function(err, dropboxUserId) {
+
+    getEvernoteOAuthLink(function(err, evernoteData) {
+      if (err) {
+        throw('Error in getEvernoteOAuthLink callback: ' + err);
+      }
+
+      returnData = {
+        "dropboxUserId": dropboxUserId,
+        "evernoteOAuthToken": evernoteData.oauthToken,
+        "evernoteOAuthSecret": evernoteData.oauthSecret,
+        "evernoteAuthorizeUrl": evernoteData.authorizeUrl
+      }
+      callback(null, dropboxTokenData, returnData);
+    });
+
   });
 }
