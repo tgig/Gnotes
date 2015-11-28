@@ -24,7 +24,7 @@ exports.handler = function(event, context) {
 
   main(event.Records[0].Sns.Message, function(err, data) {
     if (err) {
-      console.log("Error in main(): " + err);
+      throw("Error in main(): " + err);
     }
 
     context.succeed(data);
@@ -353,8 +353,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
   //if Dropbox File Id and Evernote Guid are in database, this is an update
   getDropboxEvernoteFile(dropboxFileId, function(err, fileData) {
     if (err) {
-      console.log('Error in getDropboxEvernoteFile(): ' + err);
-      return;
+      throw('Error in getDropboxEvernoteFile(): ' + err);
     }
 
     console.log('updating file');
@@ -365,8 +364,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
 
       noteStore.updateNote(newNote, function(err, evernote) {
         if (err) {
-          console.log('Error in updateNote: ' + err);
-          return evernote;
+          throw('Error in updateNote: ' + err);
         }
 
         callback();
@@ -380,9 +378,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
       //attempt to create note in evernote account
       noteStore.createNote(newNote, function(err, evernote) {
         if (err) {
-          console.log('Error in createNote: ' + err);
-          console.log('evernote: ' + JSON.stringify(evernote));
-          return;
+          throw('Error in createNote: ' + err);
         }
 
         note.guid = evernote.guid;
@@ -390,7 +386,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
         //save this id/guid to the DropboxEvernote table so it can be updated in the future
         insertDropboxEvernoteFile(dropboxFileId, note.guid, function(err, data) {
           if (err) {
-            console.log('error in insertDropboxEvernoteFile: ' + err);
+            throw('error in insertDropboxEvernoteFile: ' + err);
           }
 
           //if no error, return successfully
@@ -422,8 +418,7 @@ function loopFiles(x, filesData, user, callback) {
       //call dropbox and retrieve file
       downloadFile(_thisFile.path_lower, user.dropboxAuthToken, function(err, fileContent) {
         if (err) {
-          console.log("Error in downloadFile: " + err);
-          return;
+          throw("Error in downloadFile: " + err);
         }
 
         //if .md or .txt, process as markdown and send to evernote
@@ -435,8 +430,7 @@ function loopFiles(x, filesData, user, callback) {
           //convert markdown to html, process file at Evernote
           sendToEvernote(fileContent, _thisFile.id, user.evernoteAuthToken, function(err, note) {
             if (err) {
-              console.log('Error in sendToEvernote: ' + err);
-              return;
+              throw('Error in sendToEvernote: ' + err);
             }
 
             console.log('successfully posted file ' + _thisFile.id + ' to Evernote');
@@ -447,7 +441,7 @@ function loopFiles(x, filesData, user, callback) {
         }
         else {
           //else send to evernote as an attachment
-          //callback("Not .txt or .md");
+          console.log("This file is not .txt or .md. Doing nothing with it...");
         }
 
       });
@@ -474,8 +468,7 @@ function main(dropboxUserId, mainCallback) {
   //get the auth_token and cursor for the user
   getUser(user.dropboxUserId, function(err, userData) {
     if (err) {
-      console.log("Error in getUser: " + err);
-      return;
+      throw("Error in getUser: " + err);
     }
 
     console.log('userData: ' + JSON.stringify(userData));
@@ -487,8 +480,7 @@ function main(dropboxUserId, mainCallback) {
     //call db and get files that have changed since last cursor was retrieved
     getChangedFiles(user.dropboxFileCursor, user.dropboxAuthToken, function(err, filesData) {
       if (err) {
-        console.log("Error in getChangedFiles: " + err);
-        return;
+        throw("Error in getChangedFiles: " + err);
       }
 
       console.log('filesData: ' + JSON.stringify(filesData));

@@ -56,7 +56,7 @@ function getDropboxToken(code, callback) {
     var data = JSON.parse(body);
 
     if (data.error) {
-      console.log('Error getting dropbox bearer token: ' + data.error);
+      throw('Error getting dropbox bearer token: ' + data.error);
     }
 
     // extract bearer token
