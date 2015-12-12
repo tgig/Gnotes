@@ -18,6 +18,7 @@ exports.handler = function(event, context) {
     console.log('Request body: ' + JSON.stringify(event));
 
     for (var i in event.delta.users) {
+        console.log('i: ' + i);
 
         sns.publish({
            TopicArn: 'arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update',

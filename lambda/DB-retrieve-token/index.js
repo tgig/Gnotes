@@ -21,6 +21,10 @@ exports.handler = function(event, context) {
 ----------
 Vars and Objects
 */
+AWS.config.update({
+  region: "us-east-1"
+});
+
 var callbackUrl = 'http://localhost:9009';
 var dynamodb = new AWS.DynamoDB();
 
@@ -49,8 +53,8 @@ function getDropboxToken(code, callback) {
       redirect_uri: callbackUrl
     },
     auth: {
-      user: process.env.aws_client_id,
-      pass: process.env.aws_client_secret
+      user: process.env.dropbox_client_id,
+      pass: process.env.dropbox_client_secret
     }
   };
 
@@ -58,10 +62,10 @@ function getDropboxToken(code, callback) {
   request.post(postUrl, postData, function (error, response, body) {
 
     if (error) {
-      throw('Error getting dropbox bearer token: ' + error);
+      throw(new Error('Error getting dropbox bearer token: ' + error));
     }
     else if (response.statusCode == 400) {
-      throw('Error getting dropbox bearer token. Response body: ' + response.body);
+      throw(new Error('Error getting dropbox bearer token. Response body: ' + response.body));
     }
 
     var data = JSON.parse(body);
@@ -76,12 +80,45 @@ function getDropboxToken(code, callback) {
     //update/insert into database
     saveDropboxToken(dropboxUserId, dropboxToken, function(err, data) {
       if (err) {
-        throw('Error when saving dropbox token: ' + err);
+        throw(new Error('Error when saving dropbox token: ' + err));
       }
 
-      callback(null, dropboxUserId);
+      callback(null, { dropboxUserId: dropboxUserId, dropboxToken: dropboxToken });
 
     });
+
+  });
+
+}
+
+function getDropboxEmail(dropboxUserId, dropboxAuthToken, callback) {
+  var postUrl = 'https://api.dropboxapi.com/2/users/get_current_account';
+  var postData = {
+    headers: {
+      'Authorization': 'Bearer ' + dropboxAuthToken
+    }
+  };
+
+  request.post(postUrl, postData, function (error, response, body) {
+
+    if (error) {
+      throw(new Error('Error in getDropboxEmail: ' + error));
+    }
+    else if (response.statusCode == 400) {
+      throw(new Error('Error in getDropboxEmail. Response body: ' + response.body));
+    }
+
+    var data = JSON.parse(body);
+    var email = data.email;
+
+    saveDropboxEmail(dropboxUserId, email, function(err, emailData) {
+      if (err) {
+        throw(new Error('Error when saving email: ' + err));
+      }
+
+      callback();
+    });
+
 
   });
 
@@ -91,12 +128,12 @@ function getEvernoteOAuthLink(callback) {
   var client = new Evernote.Client ({
     consumerKey: process.env.evernote_consumer_key,
     consumerSecret: process.env.evernote_consumer_secret,
-    sandbox: true
+    sandbox: false
   });
 
   client.getRequestToken(callbackUrl, function(err, oauthToken, oauthSecret, results){
     if(err) {
-      throw('Error in getEvernoteOAuthLink: ' + err);
+      throw(new Error('Error in getEvernoteOAuthLink: ' + err));
     }
     else {
       enData = {
@@ -138,7 +175,32 @@ function saveDropboxToken(dropboxUserId, dropboxToken, callback) {
 
   dynamodb.updateItem(params, function(err, data) {
     if (err)
-      callback(new Error(err));
+      callback(err);
+    else
+      callback(null, data);
+  });
+}
+
+function saveDropboxEmail(dropboxUserId, dropboxEmail, callback) {
+  var params = {
+    TableName: "DropboxEvernoteUser",
+    Key: {
+      "DropboxUserId": {
+        "N": dropboxUserId.toString()
+      }
+    },
+    UpdateExpression: "SET Email = :dropboxEmail",
+    ExpressionAttributeValues: {
+      ":dropboxEmail": {
+        "S": dropboxEmail
+      }
+    },
+    ReturnValues: "ALL_NEW"
+  }
+
+  dynamodb.updateItem(params, function(err, data) {
+    if (err)
+      callback(err);
     else
       callback(null, data);
   });
@@ -158,21 +220,30 @@ function main(code, callback) {
 
   var user = new User();
 
-  getDropboxToken(code, function(err, dropboxUserId) {
+  getDropboxToken(code, function(err, dropboxUserIdAndToken) {
 
-    getEvernoteOAuthLink(function(err, evernoteData) {
-      if (err) {
-        throw('Error in getEvernoteOAuthLink callback: ' + err);
-      }
+    dropboxUserId = dropboxUserIdAndToken.dropboxUserId;
+    dropboxAuthToken = dropboxUserIdAndToken.dropboxToken;
 
-      returnData = {
-        "dropboxUserId": dropboxUserId,
-        "evernoteOAuthToken": evernoteData.oauthToken,
-        "evernoteOAuthSecret": evernoteData.oauthSecret,
-        "evernoteAuthorizeUrl": evernoteData.authorizeUrl
-      }
-      callback(null, dropboxTokenData, returnData);
+    getDropboxEmail(dropboxUserId, dropboxAuthToken, function(err, dropboxEmailData) {
+
+      getEvernoteOAuthLink(function(err, evernoteData) {
+        if (err) {
+          throw(new Error('Error in getEvernoteOAuthLink callback: ' + err));
+        }
+
+        returnData = {
+          "dropboxUserId": dropboxUserId,
+          "evernoteOAuthToken": evernoteData.oauthToken,
+          "evernoteOAuthSecret": evernoteData.oauthSecret,
+          "evernoteAuthorizeUrl": evernoteData.authorizeUrl
+        }
+        callback(null, returnData);
+      });
+
     });
+
+
 
   });
 }

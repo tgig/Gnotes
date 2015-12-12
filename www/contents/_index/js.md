@@ -25,7 +25,7 @@
     $('#evernoteButton').show();
   }
 
-  function getDropboxToken() {
+  function getDropboxToken(code) {
     postData = {
       "code": code
     }
@@ -39,7 +39,8 @@
     })
     .done(function(data) {
       if (data.errorMessage) {
-        setAuthWarning(true, "Something went wrong. Please click the back button and try again. If this error continues, get in touch.");
+        setAuthWarning(true, "Something went wrong in function showEvernoteButton(). Please click the back button and try again. If this error continues, get in touch.");
+        console.log('Error: ' + JSON.stringify(data, null, 2));
         return;
       }
 
@@ -64,6 +65,8 @@
       "oauthVerifier": oauthVerifier
     }
 
+    console.log('postData: ' + JSON.stringify(postData, null, 2));
+
     $.ajax({
       url: 'https://hir9ezqm9l.execute-api.us-east-1.amazonaws.com/prod/get-evernote-token',
       method: 'POST',
@@ -73,12 +76,13 @@
     })
     .done(function(data) {
       if (data.errorMessage) {
-        setAuthWarning(true, "Something went wrong. Please click the back button and try again. If this error continues, get in touch.");
+        setAuthWarning(true, "Something went wrong in function getEvernoteToken(). Please click the back button and try again. If this error continues, get in touch.");
+        console.log('Error: ' + JSON.stringify(data, null, 2));
         return;
       }
 
       //should be all done. Redirect to next page...
-
+      window.location = '/done';
 
     })
     .fail(function(err) {
@@ -98,7 +102,7 @@
       $('#dropboxButton').addClass('disabled');
       $('#dropboxButton').text('Please wait...');
 
-      getDropboxToken();
+      getDropboxToken(code);
 
     }
     else if (oauthToken != '') {
@@ -107,7 +111,7 @@
       $('#evernoteButton').text('Please wait...');
 
       var oauthVerifier = getParameterByName('oauth_verifier');
-      getEvernoteToken(oauthToken);
+      getEvernoteToken(oauthToken, oauthVerifier);
     }
   });
 
