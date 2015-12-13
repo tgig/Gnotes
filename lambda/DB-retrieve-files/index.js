@@ -1,4 +1,4 @@
-var https = require('https');
+var request = require("request");
 var AWS = require("aws-sdk");
 var marked = require("marked");
 var Evernote = require('evernote').Evernote;
@@ -64,74 +64,60 @@ End - Vars and Objects
 --------------
 API operations
 */
-function _getChangedFiles(path, postData, authToken, callback) {
 
-  var _return = '';
+//call DropBox with the authToken and cursor and retrive list of recently modified files
+function getChangedFiles(cursor, authToken, callback) {
 
-  //set options to call dropbox api
-  var options = {
-    hostname: 'api.dropboxapi.com',
-    path: path,
-    port: 443,
-    method: 'POST',
+  var postData = {
+    uri: "https://api.dropboxapi.com/2/files/list_folder/continue",
     headers: {
-      'Authorization': 'Bearer ' + authToken,
-      'Content-Type': 'application/json'
+      "Authorization": "Bearer " + authToken,
+      "Content-Type": "application/json"
+    },
+    json: {
+      "cursor": cursor
     }
-  }
+  };
 
-  var req = https.request(options, function(res) {
-    res.setEncoding('utf8');
+  request.post(postData, function (error, response, body) {
 
-    res.on('data', function(chunk) {
-      callback(null, chunk);
-    });
+    if (error) {
+      throw(new Error('Error in getChangedFiles: ' + error));
+    }
+    else if (response.statusCode == 400) {
+      throw(new Error('Error in getChangedFiles. Response body: ' + response.body));
+    }
 
-    res.on('error', function(err) {
-      callback(new Error(err));
-    });
-
+    callback(null, body);
   });
-
-  //write data to request body
-  req.write(postData);
-  req.end();
 
 }
 
-function _downloadFile(path, file, authToken, callback) {
-  var _return = '';
+function downloadFile(fileName, authToken, callback) {
 
-  //set options to call dropbox api
-  var options = {
-    hostname: 'content.dropboxapi.com',
-    path: path,
-    port: 443,
-    method: 'POST',
+  var postData = {
+    uri: "https://content.dropboxapi.com/2/files/download",
     headers: {
-      'Authorization': 'Bearer ' + authToken,
-      'Dropbox-API-Arg': file
+      "Authorization": "Bearer " + authToken,
+      "Dropbox-API-Arg": '{"path": "' + fileName + '"}'
     }
   }
 
-  var req = https.request(options, function(res) {
-    res.setEncoding('utf8');
+  request.post(postData, function (error, response, body) {
 
-    res.on('data', function(chunk) {
-      callback(null, chunk);
-    });
+    if (error) {
+      throw(new Error('Error in downloadFile: ' + error));
+    }
+    else if (response.statusCode == 400) {
+      throw(new Error('Error in downloadFile. Response body: ' + response.body));
+    }
 
-    res.on('error', function(err) {
-      callback(new Error(err));
-    });
-
+    callback(null, body);
   });
 
-  //write data to request body
-  req.write('');
-  req.end();
-
 }
+
+
 /*
 End - API operations
 --------------
@@ -256,39 +242,6 @@ End - Database operations
 --------------
 */
 
-
-//call DropBox with the authToken and cursor and retrive list of recently modified files
-function getChangedFiles(cursor, authToken, callback) {
-
-  _path = '/2/files/list_folder/continue';
-  _cursor = '{\"cursor\": \"' + cursor + '\"}';
-  _authToken = authToken;
-
-  _getChangedFiles(_path, _cursor, _authToken, function(err, data) {
-    if (err) {
-      callback(new Error('Error in _getChangedFiles: ' + err));
-      return;
-    }
-
-    callback(null, data);
-  });
-
-}
-
-function downloadFile(fileName, authToken, callback) {
-  _path = '/2/files/download';
-  _file = '{\"path\": \"' + fileName + '\"}';
-
-  _downloadFile(_path, _file, authToken, function(err, data) {
-    if (err) {
-      callback(new Error("Error in _downloadFile: " + err))
-      return;
-    }
-
-    callback(null, data);
-  })
-}
-
 /*
   In case a title was not specified in the YAML,
   Get the first 255 chars of the first line of content
@@ -319,6 +272,8 @@ function parseNote(content) {
 
   var note = new Note();
   var doc = yaml.loadFront(content);
+
+  console.log(JSON.stringify(doc));
 
   if (doc.title != undefined)
     note.title = doc.title;
@@ -452,7 +407,7 @@ function loopFiles(x, filesData, user, callback) {
 
       _thisFile = filesData.entries[x];
 
-      console.log('thisFile: ' + _thisFile.path_lower);
+      console.log('Preparing to downloadFile(): ' + _thisFile.path_lower);
 
       //call dropbox and retrieve file
       downloadFile(_thisFile.path_lower, user.dropboxAuthToken, function(err, fileContent) {
@@ -464,7 +419,7 @@ function loopFiles(x, filesData, user, callback) {
         _ext = _thisFile.path_lower.slice(-3);
         if (_ext === 'txt' || _ext === '.md') {
 
-
+          console.log('Preparing to enter sendToEvernote()');
 
           //convert markdown to html, process file at Evernote
           sendToEvernote(fileContent, _thisFile.id, user.evernoteAuthToken, function(err, note) {
@@ -521,10 +476,6 @@ function main(dropboxUserId, mainCallback) {
       if (err) {
         throw(new Error("getChangedFiles: " + err));
       }
-
-      console.log('filesData: ' + JSON.stringify(filesData));
-
-      filesData = JSON.parse(filesData);
 
       loopFiles(0, filesData, user, function(err, result) {
 
