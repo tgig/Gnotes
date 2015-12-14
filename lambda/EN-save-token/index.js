@@ -17,6 +17,7 @@ var request = require("request");
 var AWS = require("aws-sdk");
 var Evernote = require('evernote').Evernote;
 require("dotenv").load();
+var ErrorHandler = require('./shared/error-handler');
 
 exports.handler = function(event, context) {
   if (!event.dropboxUserId || !event.oauthToken || !event.oauthSecret || !event.oauthVerifier) {
@@ -77,7 +78,7 @@ function saveEvernoteAccessToken(dropboxUserId, oauthAccessToken, callback) {
 
   dynamodb.updateItem(params, function(err, data) {
     if (err)
-      callback(new Error(err));
+      callback(err);
     else
       callback(null, data);
   });
@@ -107,7 +108,7 @@ function createDropboxFile(authToken, callback) {
   request.post(postUrl, postData, function (error, response, body) {
 
     if (error) {
-      throw(new Error('Error in createDropboxFile request.post: ' + error));
+      ErrorHandler.LogError('Error in createDropboxFile request.post: ' + error);
     }
     else if (response.statusCode == 400) {
       throw(new Error('400 error in createDropboxFile request.post: ' + response.body));
@@ -139,7 +140,7 @@ function main(dropboxUserId, oauthToken, oauthSecret, oauthVerifier, callback) {
 
       saveEvernoteAccessToken(dropboxUserId, oauthAccessToken, function(err, data) {
         if (err) {
-          throw(new Error('saveEvernoteAccessToken: ' + err));
+          ErrorHandler.LogError('saveEvernoteAccessToken: ' + err);
         }
 
         console.log('saveEvernoteAccessToken data: ' + JSON.stringify(data));
@@ -147,7 +148,7 @@ function main(dropboxUserId, oauthToken, oauthSecret, oauthVerifier, callback) {
         //NEED TO: save a file to Dropbox to get us started
         createDropboxFile(data.Attributes.DropboxAuthToken.S, function(err, data) {
           if (err) {
-            throw(new Error('createDropboxFile(): ' + err));
+            ErrorHandler.LogError('createDropboxFile(): ' + err);
           }
 
           console.log('Successfully created the new file in dropbox');

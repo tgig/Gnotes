@@ -18,10 +18,10 @@ var context = {
 };
 
 
-function lambdaJSFile(lambdaDir, callback) {
+function lambdaJSFile(lambdaDir, runtimeDir, callback) {
   fs.exists(lambdaDir + '/index.js', function(exists) {
     if (exists) {
-      return callback(null, lambdaDir + '/index.js');
+      return callback(null, runtimeDir + '/index.js');
     }
     else
       return callback(new Error("index.js file does not exist in: " + lambdaDir));
@@ -47,7 +47,7 @@ function runLambda(folder) {
   //first, copy all required files to the /runtime directory
   runtime.copyLambda(runtimeDir, zipDir, folder, function() {
 
-    lambdaJSFile(lambdaDir, function(err, lambdaFile) {
+    lambdaJSFile(lambdaDir, runtimeDir, function(err, lambdaFile) {
       if (err) {
         console.log('Error in lambdaJSFile: ' + err);
         return;

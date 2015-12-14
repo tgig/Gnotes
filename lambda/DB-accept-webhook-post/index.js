@@ -3,6 +3,7 @@
 */
 
 var AWS = require('aws-sdk');
+var ErrorHandler = require('./shared/error-handler');
 
 exports.handler = function(event, context) {
     console.log('preparing to read X-Dropbox-Signature header');
@@ -25,7 +26,7 @@ exports.handler = function(event, context) {
            Message: event.delta.users[i].toString()
         }, function(err, data) {
             if (err) {
-                throw('Error pushing to SNS: ' + Err.stack);
+                ErrorHandler.LogError(err);
             }
             console.log('push sent');
             console.log(data);

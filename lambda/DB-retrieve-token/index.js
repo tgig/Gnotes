@@ -9,7 +9,7 @@ var request = require("request");
 var AWS = require("aws-sdk");
 var Evernote = require('evernote').Evernote;
 require("dotenv").load();
-
+var ErrorHandler = require('./shared/error-handler');
 
 exports.handler = function(event, context) {
   main(event.code, function (err, returnData) {
@@ -62,10 +62,10 @@ function getDropboxToken(code, callback) {
   request.post(postUrl, postData, function (error, response, body) {
 
     if (error) {
-      throw(new Error('Error getting dropbox bearer token: ' + error));
+      ErrorHandler.LogError('Error getting dropbox bearer token: ' + error);
     }
     else if (response.statusCode == 400) {
-      throw(new Error('Error getting dropbox bearer token. Response body: ' + response.body));
+      ErrorHandler.LogError('Error getting dropbox bearer token. Response body: ' + response.body);
     }
 
     var data = JSON.parse(body);
@@ -80,7 +80,7 @@ function getDropboxToken(code, callback) {
     //update/insert into database
     saveDropboxToken(dropboxUserId, dropboxToken, function(err, data) {
       if (err) {
-        throw(new Error('Error when saving dropbox token: ' + err));
+        ErrorHandler.LogError('Error when saving dropbox token: ' + err);
       }
 
       callback(null, { dropboxUserId: dropboxUserId, dropboxToken: dropboxToken });
@@ -102,10 +102,10 @@ function getDropboxEmail(dropboxUserId, dropboxAuthToken, callback) {
   request.post(postUrl, postData, function (error, response, body) {
 
     if (error) {
-      throw(new Error('Error in getDropboxEmail: ' + error));
+      ErrorHandler.LogError('Error in getDropboxEmail: ' + error);
     }
     else if (response.statusCode == 400) {
-      throw(new Error('Error in getDropboxEmail. Response body: ' + response.body));
+      ErrorHandler.LogError('Error in getDropboxEmail. Response body: ' + response.body);
     }
 
     var data = JSON.parse(body);
@@ -113,7 +113,7 @@ function getDropboxEmail(dropboxUserId, dropboxAuthToken, callback) {
 
     saveDropboxEmail(dropboxUserId, email, function(err, emailData) {
       if (err) {
-        throw(new Error('Error when saving email: ' + err));
+        ErrorHandler.LogError('Error when saving email: ' + err);
       }
 
       callback();
@@ -229,7 +229,7 @@ function main(code, callback) {
 
       getEvernoteOAuthLink(function(err, evernoteData) {
         if (err) {
-          throw(new Error('Error in getEvernoteOAuthLink callback: ' + err));
+          ErrorHandler.LogError('Error in getEvernoteOAuthLink callback: ' + err);
         }
 
         returnData = {
