@@ -8,7 +8,6 @@ var ErrorHandler = require('./shared/error-handler');
 
 AWS.config.update({
   region: "us-east-1",
-  //endpoint: "http://localhost:8000"
 });
 
 marked.setOptions({

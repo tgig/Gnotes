@@ -7,7 +7,7 @@
 <ol class="m-l-md">
 <li id="step-1">
     <div>Connect Dropbox</div>
-    <a id="dropboxButton" href="https://www.dropbox.com/1/oauth2/authorize?response_type=code&client_id=y8e16srolzb3ooc&redirect_uri=http%3A%2F%2Flocalhost%3A9009" class="btn btn-lg btn-primary m-t-lg m-b-lg">Connect Dropbox to Get Started <img src="images/dropbox-icon.png" height="35" /></a>
+    <a id="dropboxButton" href="https://www.dropbox.com/1/oauth2/authorize?response_type=code&client_id=y8e16srolzb3ooc&redirect_uri=http%3A%2F%2Fnotes.giggy.com" class="btn btn-lg btn-primary m-t-lg m-b-lg">Connect Dropbox to Get Started <img src="images/dropbox-icon.png" height="35" /></a>
     </li>
 <li id="step-2">
   <div>Connect Evernote</div>

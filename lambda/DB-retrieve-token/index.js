@@ -25,7 +25,7 @@ AWS.config.update({
   region: "us-east-1"
 });
 
-var callbackUrl = 'http://localhost:9009';
+var callbackUrl = 'http://notes.giggy.com';
 var dynamodb = new AWS.DynamoDB();
 
 function User(dropboxUserId, dropboxFileCursor, dropboxAuthToken, evernoteAuthToken) {
