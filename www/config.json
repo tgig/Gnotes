@@ -16,7 +16,7 @@
 
 	"plugins": {
 		"helpers": {
-			"test_page_helper": "./lib/helpers/cors_headers.js"
+			"test_page_helper": "./lib/cors_headers.js"
 		}
 
 	}
