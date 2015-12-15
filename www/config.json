@@ -17,9 +17,14 @@
 	"plugins": {
 		"helpers": {
 			"test_page_helper": "./lib/cors_headers.js"
-		}
+		},
+		"publishers": {
+      "custom_strategy": "./lib/publish.js"
+    }
+	},
 
+	"publish": {
+		"strategy": "custom_strategy"
 	}
-
 
 }
