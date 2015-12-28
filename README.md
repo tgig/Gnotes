@@ -12,7 +12,6 @@ I don't like to rely on a third party service to hold all my content, so it's ni
 
 And... I was curious about AWS Lambda and needed a good test project.
 
-* * *
 
 ## How it works
 
@@ -29,10 +28,8 @@ Works like this:
 3. AWS Lambda queues a job in SNS, which is connected to another AWS Lambda
 4. Lambda #2 grabs the file from Dropbox, converts it to ENML, uploads to Evernote
 
-* * *
 
-
-**Hosted 100% on AWS:**
+### Hosted 100% on AWS:
 
 * **API Gateway** - connecting to AWS Lambdas
 * **Lambda** - all business logic
@@ -47,14 +44,14 @@ Works like this:
 
 ## Repo structure
 
-**lambda**
+#### lambda
 
 All AWS Lambdas and all business logic code is in this folder. There are two scripts used to develop and deploy to AWS:
 
   * `node run-lambda [folder name]` - Run this code in the terminal to execute the Lambda locally. Must have a folder named [folder name], with files named `index.js` and `event.json`
   * `node deploy-zip [folder name]` - Zips up Lambda code, node_modules, and shared files and uploads it to named AWS Lambda.
 
-**www**
+#### www
 
 Built with [Punch](https://github.com/laktek/punch)
 
