@@ -24,7 +24,7 @@ exports.handler = function(event, context) {
 
   main(event.Records[0].Sns.Message, function(err, data) {
     if (err) {
-      ErrorHandler.LogError(err);
+      return ErrorHandler.LogError(err);
     }
 
     context.succeed(data);
@@ -82,10 +82,10 @@ function getChangedFiles(cursor, authToken, callback) {
   request.post(postData, function (error, response, body) {
 
     if (error) {
-      ErrorHandler.LogError('Error in getChangedFiles: ' + error);
+      return ErrorHandler.LogError('Error in getChangedFiles: ' + error);
     }
     else if (response.statusCode == 400) {
-      ErrorHandler.LogError('Error in getChangedFiles. Response body: ' + response.body);
+      return ErrorHandler.LogError('Error in getChangedFiles. Response body: ' + response.body);
     }
 
     callback(null, body);
@@ -106,10 +106,10 @@ function downloadFile(fileName, authToken, callback) {
   request.post(postData, function (error, response, body) {
 
     if (error) {
-      ErrorHandler.LogError('Error in downloadFile: ' + error);
+      return ErrorHandler.LogError('Error in downloadFile: ' + error);
     }
     else if (response.statusCode == 400) {
-      ErrorHandler.LogError('Error in downloadFile. Response body: ' + response.body);
+      return ErrorHandler.LogError('Error in downloadFile. Response body: ' + response.body);
     }
 
     callback(null, body);
@@ -142,7 +142,7 @@ function getUser(dropboxUserId, callback) {
 
   dynamodb.getItem(params, function(err, data) {
     if (err) {
-      ErrorHandler.LogError('Error in DB-retrieve-files.getUser: ' + err);
+      return ErrorHandler.LogError('Error in DB-retrieve-files.getUser: ' + err);
     }
     else {
       callback(null, data);
@@ -164,7 +164,7 @@ function getDropboxEvernoteFile(dropboxFileId, callback) {
 
   dynamodb.getItem(params, function(err, data) {
     if (err) {
-      ErrorHandler.LogError('Error in DB-retrieve-files.getDropboxEvernotefile: ' + err);
+      return ErrorHandler.LogError('Error in DB-retrieve-files.getDropboxEvernotefile: ' + err);
     }
     else {
       callback(null, data);
@@ -186,7 +186,7 @@ function insertDropboxEvernoteFile(dropboxFileId, evernoteGuid, callback) {
 
   dynamodb.putItem(params, function(err, data) {
     if (err)
-      ErrorHandler.LogError('Error in DB-retrieve-files.insertDropboxEvernotefile: ' + err);
+      return ErrorHandler.LogError('Error in DB-retrieve-files.insertDropboxEvernotefile: ' + err);
     else
       callback(null, data);
   });
@@ -205,7 +205,7 @@ function deleteDropboxEvernoteFile(dropboxFileId, callback) {
 
   dynamodb.deleteItem(params, function(err, data) {
     if (err)
-      ErrorHandler.LogError('Error in DB-retrieve-files.deleteDropboxEvernoteFile: ' + err);
+      return ErrorHandler.LogError('Error in DB-retrieve-files.deleteDropboxEvernoteFile: ' + err);
     else
       callback(null, data);
   });
@@ -232,7 +232,7 @@ function updateCursor(dropboxFileId, dropboxFileCursor, callback) {
 
   dynamodb.updateItem(params, function(err, data) {
     if (err)
-      ErrorHandler.LogError('Error in DB-retrieve-files.updateCursor: ' + err);
+      return ErrorHandler.LogError('Error in DB-retrieve-files.updateCursor: ' + err);
     else
       callback(null, data);
   });
@@ -272,8 +272,6 @@ function parseNote(content) {
 
   var note = new Note();
   var doc = yaml.loadFront(content);
-
-  console.log(JSON.stringify(doc));
 
   if (doc.title != undefined)
     note.title = doc.title;
@@ -322,7 +320,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
   //if Dropbox File Id and Evernote Guid are in database, this is an update
   getDropboxEvernoteFile(dropboxFileId, function(err, fileData) {
     if (err) {
-      ErrorHandler.LogError('getDropboxEvernoteFile(): ' + err);
+      return ErrorHandler.LogError('getDropboxEvernoteFile(): ' + err);
     }
 
     console.log('fileData.Item: ' + JSON.stringify(fileData.Item));
@@ -349,7 +347,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
           }
           else {
             console.log('updateNote err: ' + err);
-            ErrorHandler.LogError('updateNote: ' + JSON.stringify(err, null, 2));
+            return ErrorHandler.LogError('updateNote: ' + JSON.stringify(err, null, 2));
           }
 
         }
@@ -369,7 +367,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
       noteStore.createNote(newNote, function(err, evernote) {
         if (err) {
           console.log('newNote: ' + JSON.stringify(newNote, null, 2));
-          ErrorHandler.LogError('noteStore.createNote: ' + JSON.stringify(err, null, 2));
+          return ErrorHandler.LogError('noteStore.createNote: ' + JSON.stringify(err, null, 2));
         }
 
         console.log('Created evernote note. Guid: ' + evernote.guid);
@@ -378,7 +376,7 @@ function sendToEvernote(data, dropboxFileId, evernoteAuthToken, callback) {
         //save this id/guid to the DropboxEvernote table so it can be updated in the future
         insertDropboxEvernoteFile(dropboxFileId, note.guid, function(err, data) {
           if (err) {
-            ErrorHandler.LogError('insertDropboxEvernoteFile: ' + err);
+            return ErrorHandler.LogError('insertDropboxEvernoteFile: ' + err);
           }
 
           console.log('Inserted row into DBENFile');
@@ -412,7 +410,7 @@ function loopFiles(x, filesData, user, callback) {
       //call dropbox and retrieve file
       downloadFile(_thisFile.path_lower, user.dropboxAuthToken, function(err, fileContent) {
         if (err) {
-          ErrorHandler.LogError("downloadFile: " + err);
+          return ErrorHandler.LogError("downloadFile: " + err);
         }
 
         //if .md or .txt, process as markdown and send to evernote
@@ -424,7 +422,7 @@ function loopFiles(x, filesData, user, callback) {
           //convert markdown to html, process file at Evernote
           sendToEvernote(fileContent, _thisFile.id, user.evernoteAuthToken, function(err, note) {
             if (err) {
-              ErrorHandler.LogError('sendToEvernote: ' + err);
+              return ErrorHandler.LogError('sendToEvernote: ' + err);
             }
 
             console.log('successfully posted file ' + _thisFile.id + ' to Evernote');
@@ -462,7 +460,7 @@ function main(dropboxUserId, mainCallback) {
   //get the auth_token and cursor for the user
   getUser(user.dropboxUserId, function(err, userData) {
     if (err) {
-      ErrorHandler.LogError("getUser: " + err);
+      return ErrorHandler.LogError("getUser: " + err);
     }
 
     console.log('userData: ' + JSON.stringify(userData));
@@ -474,7 +472,7 @@ function main(dropboxUserId, mainCallback) {
     //call db and get files that have changed since last cursor was retrieved
     getChangedFiles(user.dropboxFileCursor, user.dropboxAuthToken, function(err, filesData) {
       if (err) {
-        ErrorHandler.LogError("getChangedFiles: " + err);
+        return ErrorHandler.LogError("getChangedFiles: " + err);
       }
 
       loopFiles(0, filesData, user, function(err, result) {
@@ -484,7 +482,7 @@ function main(dropboxUserId, mainCallback) {
         //update dropbox cursor
         updateCursor(user.dropboxUserId, filesData.cursor, function(err, data) {
           if (err) {
-            ErrorHandler.LogError("updateCursor(): " + err);
+            return ErrorHandler.LogError("updateCursor(): " + err);
           }
 
           console.log('Done updating cursor');

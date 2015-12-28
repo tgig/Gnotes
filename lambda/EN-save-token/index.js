@@ -108,7 +108,7 @@ function createDropboxFile(authToken, callback) {
   request.post(postUrl, postData, function (error, response, body) {
 
     if (error) {
-      ErrorHandler.LogError('Error in createDropboxFile request.post: ' + error);
+      return ErrorHandler.LogError('Error in createDropboxFile request.post: ' + error);
     }
     else if (response.statusCode == 400) {
       throw(new Error('400 error in createDropboxFile request.post: ' + response.body));
@@ -140,7 +140,7 @@ function main(dropboxUserId, oauthToken, oauthSecret, oauthVerifier, callback) {
 
       saveEvernoteAccessToken(dropboxUserId, oauthAccessToken, function(err, data) {
         if (err) {
-          ErrorHandler.LogError('saveEvernoteAccessToken: ' + err);
+          return ErrorHandler.LogError('saveEvernoteAccessToken: ' + err);
         }
 
         console.log('saveEvernoteAccessToken data: ' + JSON.stringify(data));
@@ -148,7 +148,7 @@ function main(dropboxUserId, oauthToken, oauthSecret, oauthVerifier, callback) {
         //NEED TO: save a file to Dropbox to get us started
         createDropboxFile(data.Attributes.DropboxAuthToken.S, function(err, data) {
           if (err) {
-            ErrorHandler.LogError('createDropboxFile(): ' + err);
+            return ErrorHandler.LogError('createDropboxFile(): ' + err);
           }
 
           console.log('Successfully created the new file in dropbox');

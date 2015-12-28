@@ -25,7 +25,7 @@ AWS.config.update({
   region: "us-east-1"
 });
 
-var callbackUrl = 'http://notes.giggy.com';
+var callbackUrl = 'https://notes.giggy.com';
 var dynamodb = new AWS.DynamoDB();
 
 function User(dropboxUserId, dropboxFileCursor, dropboxAuthToken, evernoteAuthToken) {
@@ -62,11 +62,16 @@ function getDropboxToken(code, callback) {
   request.post(postUrl, postData, function (error, response, body) {
 
     if (error) {
-      ErrorHandler.LogError('Error getting dropbox bearer token: ' + error);
+      return ErrorHandler.LogError('Error getting dropbox bearer token: ' + error);
     }
     else if (response.statusCode == 400) {
-      ErrorHandler.LogError('Error getting dropbox bearer token. Response body: ' + response.body);
+      return ErrorHandler.LogError('Error getting dropbox bearer token. Response body: ' + response.body);
     }
+
+
+    console.log('error: ' + JSON.stringify(error));
+    console.log('response: ' + JSON.stringify(response));
+    console.log('body: ' + JSON.stringify(body));
 
     var data = JSON.parse(body);
 
@@ -80,7 +85,7 @@ function getDropboxToken(code, callback) {
     //update/insert into database
     saveDropboxToken(dropboxUserId, dropboxToken, function(err, data) {
       if (err) {
-        ErrorHandler.LogError('Error when saving dropbox token: ' + err);
+        return ErrorHandler.LogError('Error when saving dropbox token: ' + err);
       }
 
       callback(null, { dropboxUserId: dropboxUserId, dropboxToken: dropboxToken });
@@ -102,10 +107,10 @@ function getDropboxEmail(dropboxUserId, dropboxAuthToken, callback) {
   request.post(postUrl, postData, function (error, response, body) {
 
     if (error) {
-      ErrorHandler.LogError('Error in getDropboxEmail: ' + error);
+      return ErrorHandler.LogError('Error in getDropboxEmail: ' + error);
     }
     else if (response.statusCode == 400) {
-      ErrorHandler.LogError('Error in getDropboxEmail. Response body: ' + response.body);
+      return ErrorHandler.LogError('Error in getDropboxEmail. Response body: ' + response.body);
     }
 
     var data = JSON.parse(body);
@@ -113,7 +118,7 @@ function getDropboxEmail(dropboxUserId, dropboxAuthToken, callback) {
 
     saveDropboxEmail(dropboxUserId, email, function(err, emailData) {
       if (err) {
-        ErrorHandler.LogError('Error when saving email: ' + err);
+        return ErrorHandler.LogError('Error when saving email: ' + err);
       }
 
       callback();
@@ -229,7 +234,7 @@ function main(code, callback) {
 
       getEvernoteOAuthLink(function(err, evernoteData) {
         if (err) {
-          ErrorHandler.LogError('Error in getEvernoteOAuthLink callback: ' + err);
+          return ErrorHandler.LogError('Error in getEvernoteOAuthLink callback: ' + err);
         }
 
         returnData = {

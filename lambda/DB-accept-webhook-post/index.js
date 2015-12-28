@@ -26,7 +26,7 @@ exports.handler = function(event, context) {
            Message: event.delta.users[i].toString()
         }, function(err, data) {
             if (err) {
-                ErrorHandler.LogError(err);
+                return ErrorHandler.LogError(err);
             }
             console.log('push sent');
             console.log(data);
