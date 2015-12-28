@@ -8,6 +8,12 @@ body {
   color: #fffef7;
 }
 
+h1 {
+  color: #f09a3d;
+}
+h2 {
+  color: #e44e7a;
+}
 .container {
   max-width: 680px;
 }
@@ -22,11 +28,3 @@ body {
   padding-top: 0;
 }
 
-h1.cover-heading {
-  color: #f09a3d;
-
-}
-
-.font-color-bold {
-  color: #e44e7a;
-}

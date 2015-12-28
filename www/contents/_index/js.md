@@ -18,6 +18,10 @@
     }
   }
 
+  function sendToDropbox() {
+    window.location.href = 'https://www.dropbox.com/1/oauth2/authorize?response_type=code&client_id=y8e16srolzb3ooc&redirect_uri=https%3A%2F%2Fnotes.giggy.com';
+  }
+
   function showEvernoteButton(data) {
     $('#dropboxButton').hide();
     $('#step-1').css('text-decoration', 'line-through');
@@ -82,7 +86,7 @@
       }
 
       //should be all done. Redirect to next page...
-      window.location = '/done';
+      window.location = '/done.html';
 
     })
     .fail(function(err) {

@@ -1,5 +1,5 @@
-<h1 class="cover-heading m-t-lg"># Write Markdown</h1>
-<h2 class="font-color-bold">&#42;&#42;Save it to Dropbox&#42;&#42;</h2>
+<h1 class="m-t-lg"># Write Markdown</h1>
+<h2>&#42;&#42;Save it to Dropbox&#42;&#42;</h2>
 <p class="lead">See it in Evernote</p>
 
 <div id="auth-warning" class="alert alert-warning" role="alert" style="display: none;">[Auth Warning]</div>
@@ -7,7 +7,7 @@
 <ol class="m-l-md">
 <li id="step-1">
     <div>Connect Dropbox</div>
-    <a id="dropboxButton" href="https://www.dropbox.com/1/oauth2/authorize?response_type=code&client_id=y8e16srolzb3ooc&redirect_uri=http%3A%2F%2Fnotes.giggy.com" class="btn btn-lg btn-primary m-t-lg m-b-lg">Connect Dropbox to Get Started <img src="images/dropbox-icon.png" height="35" /></a>
+    <a id="dropboxButton" href="javascript:void(0)" onclick="sendToDropbox()" class="btn btn-lg btn-primary m-t-lg m-b-lg">Connect Dropbox to Get Started <img src="images/dropbox-icon.png" height="35" /></a>
     </li>
 <li id="step-2">
   <div>Connect Evernote</div>

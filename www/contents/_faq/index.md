@@ -1,8 +1,10 @@
 # FAQ
 
-## WTF?
+<h2 class="m-t-lg">WTF?</h2>
 
-Basically, I really like Evernote. But I don't like the interface to Evernote. As a coder, I like the interface to Atom and Sublime Text.
+Basically, I really like Evernote. But I don't like the interface to Evernote. As a coder, I like the interface to [Atom](https://atom.io/), [Sublime Text](http://www.sublimetext.com), and [iTerm](https://www.iterm2.com).
+
+Markdown is a beautiful thing, and I prefer to write notes with markdown formatting. Evernote doesn't let me use markdown.
 
 I like to write a lot of notes and Evernote isn't the most convenient thing to pull up.
 
@@ -32,15 +34,17 @@ Yes, for now. I don't expect enough people to use this service for it to be a bu
 
 ## Is it reliable?
 
-You *should* get an email notification if a file is not successfully uploaded. I wouldn't rely on this for very important applications.
+It works pretty good for me :) But I wouldn't rely on Gnotes for very important applications.
+
+If the service fails you *should* get an email notification, and I will get one too. If you get an email, it will include as much info as I received. Try again. If it continues to fail, [get in touch](/contact).
 
 ## What is the technical architecture?
 
 All code is available for review at:
 
-https://github.com/tgig/Markdown-to-Evernote
+[https://github.com/tgig/Gnotes](https://github.com/tgig/Gnotes)
 
-**AWS**
+### AWS
   * API Gateway
   * Lambda
   * SNS
@@ -48,30 +52,51 @@ https://github.com/tgig/Markdown-to-Evernote
   * S3
   * Cloudfront
 
-**Signup**
-AWS S3 (static website) >
-Dropbox (OAuth) >
-AWS S3 (Dropbox returns code for request token) >
-AWS Lambda (calls Dropbox to get token, saves to AWS DynamoDB, calls Evernote to get link for auth) >
-AWS S3 (show Evernote button) >
-Evernote (OAuth) >
-AWS S3 (Receive pre-tokens from EN) >
-AWS Lambda (use EN tokens to generate actual access token)
+### Signup
 
-**Dropbox to Evernote**
-Dropbox Webhook (when a file is added/modified) >
-AWS Lambda (to receive webhook and write to SNS) >
-SNS (to notify Lambda to retrieve file content) >
-AWS Lambda (to retrieve file content from Dropbox, convert to Evernote XML, upload to Evernote) >
+![Signup Process Flow AWS, Dropbox, Evernote](/images/ProcessFlow-Signup.png)
+
+  1. Site is hosted on S3. Clicking the "Connect Dropbox" button sends you to Dropbox for authorization. Dropbox sends back a code.
+  2. Call Lambda with the Dropbox code.
+  3. Call Dropbox to retrieve the authentication token.
+  4. Call Evernote to retrieve the OAuth url used for API authentication.
+  5. Save Dropbox authentication token and email address to DynamoDB. If new user, create a new row, if existing user, update.
+  6. Send success back to S3.
+  7. When you clicks "Connect Evernote" button, sends you to Evernote for authorization. Evernote sends back a code.
+  8. Call Lambda with the Evernote code. Authentication token is created.
+  9. Save Evernote auth token to DynamoDB.
+  10. Send success message back to S3, display success page.
+
+### Dropbox to Evernote
+
+![Save Note Process Flow, AWS, Dropbox, Evernote](/images/ProcessFlow-SaveNote.png)
+
+  1. Dropbox Webhook calls Lambda (DB-accept-webhook) function via API Gateway url
+  2. Lambda writes to SNS
+  3. SNS calls another Lambda (DB-retrieve-files) which then,
+  4. Retrieves user record from DynamoDB using Id from Dropbox webhook
+  5. Gets list of changed files from Dropbox
+  6. Loops through list and retrieves file content from Dropbox
+  7. If file is a markdown `.md` file, convert markdown to funky Evernote XML format then upload to Evernote
+  8. If new note, save Dropbox File Id and Evernote Guid to DynamoDB
+
 
 ## What is your favorite color?
 
 Orange
 
+## Will my changes in Evernote get synced back to my text file?
+
+No. I don't currently modify your text files at all. If you make a change in Evernote, it will not reflect back in the original text file it originated from.
+
+## Can I download an older Evernote note into a local text file?
+
+No
+
 ## Will you please add XYZ and ABC features?
 
 Submit an Issue on Github and we'll chat about it.
 
-[https://github.com/tgig/Markdown-to-Evernote](https://github.com/tgig/Markdown-to-Evernote)
+[https://github.com/tgig/Gnotes](https://github.com/tgig/Gnotes)
 
 
