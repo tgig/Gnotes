@@ -1,6 +1,20 @@
 # Gnotes
 
-## Not ready for primetime, still under development (getting close though!)
+Basically, I really like Evernote. But I don't like the interface to Evernote. As a coder, I like the interface to Atom, Sublime Text, and iTerm.
+
+Markdown is a beautiful thing, and I prefer to write notes with markdown formatting. Evernote doesn't let me use markdown.
+
+I like to write a lot of notes and Evernote isn't the most convenient thing to pull up.
+
+Sometimes I like to write very long notes and Evernote gets laggy.
+
+I don't like to rely on a third party service to hold all my content, so it's nice to have a local copy of everything.
+
+And... I was curious about AWS Lambda and needed a good test project.
+
+* * *
+
+## How it works
 
 Uses Dropbox, Evernote, and AWS.
 
@@ -27,6 +41,10 @@ Works like this:
 * **S3** - host website
 * **Cloudfront** - CDN & enables an SSL certificate to be installed
 
+![Signup Process Flow AWS, Dropbox, Evernote](https://notes.giggy.com/images/ProcessFlow-Signup.png)
+
+![Save Note Process Flow, AWS, Dropbox, Evernote](https://notes.giggy.com/images/ProcessFlow-SaveNote.png)
+
 ## Repo structure
 
 **lambda**
@@ -47,3 +65,7 @@ git clone https://github.com/tgig/Gnotes.git
 npm install
 punch s
 ```
+
+Be sure to create a `.env` file.
+
+Right now there are a few hard coded sections. Not ideal, but I don't really expect anybody else to be running versions of this on their own server any time soon.
