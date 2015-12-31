@@ -52,7 +52,8 @@ exports.copyLambda = function(runtimeDir, zipDir, moduleName, callback) {
         console.log('# Copied ' + dirToZip + '/index.js >> to >> ' + runtimeDir + 'index.js');
 
         //copy .env file to temp folder (it is in the parent dir, so need to do some fancy footwork)
-        exec('cd ' + process.cwd() + '; cd ..; cp .env ' + runtimeDir + '.env', function(err, stdout, stderr) {
+        //also copy to the /lambda folder for local running
+        exec('cd ' + process.cwd() + '; cd ..; cp .env ' + runtimeDir + '.env; cp .env lambda/.env', function(err, stdout, stderr) {
           if (err) {
               throw('Error when copying .env: ' + err);
             }

@@ -8,7 +8,7 @@ get appropriate link for Evernote auth
 var request = require("request");
 var AWS = require("aws-sdk");
 var Evernote = require('evernote').Evernote;
-require("dotenv").load();
+require("dotenv").load({path: './.env'});
 var ErrorHandler = require('./shared/error-handler');
 
 exports.handler = function(event, context) {
@@ -222,8 +222,6 @@ function main(code, callback) {
     //yes - update
     //no - insert
   //return success
-
-  var user = new User();
 
   getDropboxToken(code, function(err, dropboxUserIdAndToken) {
 

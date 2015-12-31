@@ -21,7 +21,7 @@ var context = {
 function lambdaJSFile(lambdaDir, runtimeDir, callback) {
   fs.exists(lambdaDir + '/index.js', function(exists) {
     if (exists) {
-      return callback(null, runtimeDir + '/index.js');
+      return callback(null, runtimeDir + 'index.js');
     }
     else
       return callback(new Error("index.js file does not exist in: " + lambdaDir));
@@ -52,6 +52,7 @@ function runLambda(folder) {
         console.log('Error in lambdaJSFile: ' + err);
         return;
       }
+      console.log('lambdaFile: ' + lambdaFile);
 
       lambdaEventJson(lambdaDir, function(err, eventJson) {
         if (err) {
