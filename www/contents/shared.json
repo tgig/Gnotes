@@ -1,5 +1,4 @@
 {
-	"site-title": "Gnotes",
 	"navbar": [
     { "label": "Home", "href": "/", "active": " active" },
     { "label": "FAQ", "href": "/faq.html", "active": "" },
