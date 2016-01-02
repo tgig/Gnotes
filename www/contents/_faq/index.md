@@ -14,6 +14,10 @@ I don't like to rely on a third party service to hold all my content, so it's ni
 
 And... I was curious about AWS Lambda and needed a good test project.
 
+## How does it work?
+
+Just save a text file with a `.md` extension in your Dropbox connected Gnotes folder. The first line is the title of the resulting Evernote note. When you connect your Dropbox and Evernote accounts the first time, I create a sample text file inside your Dropbox folder.
+
 ## Why do I need to connect Dropbox and Evernote?
 
 When you save a `.md` file to your connected Dropbox folder, Gnotes receives a webhook notice. The content of your `.md` file is pulled by an AWS Lambda, converted to the wonky Evernote XML format, and uploaded.
@@ -81,9 +85,9 @@ All code is available for review at:
   8. If new note, save Dropbox File Id and Evernote Guid to DynamoDB
 
 
-## What is your favorite color?
+## Do you have a mobile app?
 
-Orange
+[Jottings](http://jottingsapp.com/) is a great app to see all your notes on iOS. Just point the Dropbox folder to Gnotes and you can write notes on mobile the same way you do on your computer.
 
 ## Will my changes in Evernote get synced back to my text file?
 
