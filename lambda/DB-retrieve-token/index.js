@@ -152,10 +152,13 @@ function getDropboxCursor(dropboxUserId, dropboxAuthToken, callback) {
       return ErrorHandler.LogError('Error in getDropboxCursor. Response body: ' + response.body);
     }
 
-    var data = JSON.parse(body);
-    var cursor = data.cursor;
-
-    console.log('getDropboxCursor data: ' + data);
+    try {
+      console.log('getDropboxCursor post data: ' + JSON.stringify(body));
+      var cursor = body.cursor;
+    }
+    catch (e) {
+      return ErrorHandler.LogError('Error in getDropboxCursor: ' + e);
+    }
 
     saveDropboxCursor(dropboxUserId, cursor, function(err, cursorData) {
       if (err) {
