@@ -1,22 +1,22 @@
 {
-    "Records": [
-        {
-            "EventSource": "aws:sns",
-            "EventVersion": "1.0",
-            "EventSubscriptionArn": "arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update:2415ee35-ed71-47e8-971f-2c9705dc426a",
-            "Sns": {
-                "Type": "Notification",
-                "MessageId": "9f4343d1-c3aa-5803-b32c-0d10287411c7",
-                "TopicArn": "arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update",
-                "Subject": null,
-                "Message": "25802399",
-                "Timestamp": "2015-11-15T02:10:38.151Z",
-                "SignatureVersion": "1",
-                "Signature": "DSGNPvG6jtmzNaqML2KCSWRVWTcWN1lRuLPJgzEnzsFWinAzT6TgCgOs51SYudvt5iCxr0uTmaNJvC0buNiTxBGesOgGTR9iwjsohW4MAKT6d+0Cpn3OnH3c808vsO62+PkxFBthtpW85YtZTabTRNRkYKGUuIR87E6V6mucCIKlsLL8+xsDkoDPXAX/3bqy2oz6mcBA+uO8eszagjhGBIXCJ97Flh/f6Lho/YrlSlwwmPU4CptexbLGw4/GA4hxkLDwdzGt0RCEfVoV4+dJutHe0CtQjJY0vJoxsfs74dUFpIx2kINim3nNgZUJ2dvbZAuY+m/ikMLUvS0BVmbReA==",
-                "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-bb750dd426d95ee9390147a5624348ee.pem",
-                "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update:2415ee35-ed71-47e8-971f-2c9705dc426a",
-                "MessageAttributes": {}
-            }
-        }
-    ]
+  "Records": [
+    {
+      "EventSource": "aws:sns",
+      "EventVersion": "1.0",
+      "EventSubscriptionArn": "arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update:2415ee35-ed71-47e8-971f-2c9705dc426a",
+      "Sns": {
+        "Type": "Notification",
+        "MessageId": "e46e11e3-432d-5a7e-87ee-5ee7f40bf307",
+        "TopicArn": "arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update",
+        "Subject": null,
+        "Message": "60448756",
+        "Timestamp": "2016-01-04T18:07:34.905Z",
+        "SignatureVersion": "1",
+        "Signature": "aY8IfkDiWhbzmYovD7IgJjmNbr1XRaJnMlqGrITR3S5pueFqM+bFOMaVwixbTE1AKxJfWca4d1CAuY6/Zh0DVT90bIm60SH9EoDrs0+7jv7RziSFIGQwL16/F2wMpnPy13Da+/tfx6UGWmMMiScOLVrajPjIJ2Tkv5JE5Mwn6IlJjB7Gdi6qiWilFsl+lrLATF2veUPO8Lo8o1Sbx9m8d2angEEY60cd9tVbIAmCcL5WU2nnktyyvCTMMuK2XbZaxb/dPqI4DzlF2xANt5JLG/z/WDfUxus/5wU0M6uwvDUiDdymhZu/tb8mEED6KwYOs09VpnZ/McpVmRLPCjV+3Q==",
+        "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/SimpleNotificationService-bb750dd426d95ee9390147a5624348ee.pem",
+        "UnsubscribeUrl": "https://sns.us-east-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:us-east-1:420261107226:Dropbox_File_Update:2415ee35-ed71-47e8-971f-2c9705dc426a",
+        "MessageAttributes": {}
+      }
+    }
+  ]
 }

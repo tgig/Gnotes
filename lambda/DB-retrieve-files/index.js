@@ -283,6 +283,14 @@ function parseNote(content) {
     note.title = getTitle(doc.__content);
   }
 
+  //remove line breaks
+  try {
+    note.title = note.title.replace(/(\r\n|\n|\r)/gm,"");
+  }
+  catch (e) {
+    return ErrorHandler.LogError('error when replacing note.title line breaks: ' + e);
+  }
+
   if (doc.tags != undefined)
     note.tags = doc.tags;
 
@@ -371,6 +379,7 @@ function sendToEvernote(data, dropboxFileId, user, callback) {
       noteStore.createNote(newNote, function(err, evernote) {
         if (err) {
           console.log('newNote: ' + JSON.stringify(newNote, null, 2));
+          console.log('Evernote err: ' + JSON.stringify(err));
           return ErrorHandler.LogError('noteStore.createNote: ' + err, user.email);
         }
 
