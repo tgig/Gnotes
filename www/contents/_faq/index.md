@@ -89,6 +89,10 @@ All code is available for review at:
 
 [Jottings](http://jottingsapp.com/) is a great app to see all your notes on iOS. Just point the Dropbox folder to Gnotes and you can write notes on mobile the same way you do on your computer.
 
+## If I modify an existing `.md` file in my Dropbox folder, will the changes be synced to Evernote?
+
+All `.md` file mods will sync. I.e., if you edit an existing `.md` file in your Dropbox folder and save it, you should see those mods in Evernote within a few seconds.
+
 ## Will my changes in Evernote get synced back to my text file?
 
 No. I don't currently modify your text files at all. If you make a change in Evernote, it will not reflect back in the original text file it originated from.
