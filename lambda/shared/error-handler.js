@@ -10,7 +10,7 @@ exports.LogError = function(error, email) {
     if (snsErr)
       throw('Error in LogError.PushToSNS: ' + snsErr);
 
-    console.log('PushToSNS data: ' + snsData);
+    console.log('PushToSNS data: ' + JSON.stringify(snsData));
 
     if (email != undefined) {
       SendUserEmail(error, email, function(emailErr, emailData) {
@@ -38,7 +38,7 @@ function PushToSNS(error, callback) {
           throw('Error pushing error messge to SNS: ' + err);
       }
       console.log('Error message pushed to SNS');
-      callback(data);
+      callback(null, data);
   });
 }
 
@@ -70,7 +70,7 @@ function SendUserEmail(error, email, callback) {
         throw('Error sending error message to SES: ' + err);
 
       console.log('Email sent:');
-      callback(data);
+      callback(null, data);
   });
 
 }
