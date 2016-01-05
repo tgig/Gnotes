@@ -447,6 +447,7 @@ function loopFiles(x, filesData, user, callback) {
         else {
           //else send to evernote as an attachment
           console.log("This file is not .txt or .md. Doing nothing with it...");
+          return ErrorHandler.LogError('The Gnotes service only processes files with a .md extension. Your recent file with extension ' + _ext + ' will not be synced to Evernote.', user.email);
         }
 
       });
