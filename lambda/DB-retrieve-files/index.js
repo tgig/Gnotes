@@ -5,6 +5,7 @@ var marked = require("marked");
 var Evernote = require('evernote').Evernote;
 var yaml = require('yaml-front-matter');
 var moment = require('moment');
+var path = require('path');
 var ErrorHandler = require('./shared/error-handler');
 
 AWS.config.update({
@@ -420,17 +421,18 @@ function loopFiles(x, filesData, user, callback) {
 
       console.log('Preparing to downloadFile(): ' + _thisFile.path_lower);
 
-      //call dropbox and retrieve file
-      downloadFile(_thisFile.path_lower, user, function(err, fileContent) {
-        if (err) {
-          return ErrorHandler.LogError("downloadFile: " + err, user.email);
-        }
+      //if .md or .txt, process as markdown and send to evernote
+      //_ext = _thisFile.path_lower.slice(-3);
+      _ext = path.extname(_thisFile.path_lower);
+      if (_ext === '.md') {
 
-        //if .md or .txt, process as markdown and send to evernote
-        //_ext = _thisFile.path_lower.slice(-3);
-        var path = require('path');
-        _ext = path.extname(_thisFile.path_lower);
-        if (_ext === 'txt' || _ext === '.md') {
+
+        //call dropbox and retrieve file
+        downloadFile(_thisFile.path_lower, user, function(err, fileContent) {
+          if (err) {
+            return ErrorHandler.LogError("downloadFile: " + err, user.email);
+          }
+
 
           console.log('Preparing to enter sendToEvernote()');
 
@@ -445,14 +447,16 @@ function loopFiles(x, filesData, user, callback) {
 
           });
 
-        }
-        else {
-          //else send to evernote as an attachment
-          console.log("This file is not .txt or .md. Doing nothing with it...");
-          return ErrorHandler.LogError('The Gnotes service only processes files with a .md extension. Your recent file with extension ' + _ext + ' will not be synced to Evernote.', user.email);
-        }
+        });
 
-      });
+
+      }
+      else {
+        //else send to evernote as an attachment
+        console.log("This file is not .txt or .md. Doing nothing with it...");
+        return ErrorHandler.LogError('The Gnotes service only processes files with a .md extension. Your recent file with extension ' + _ext + ' will not be synced to Evernote.', user.email);
+      };
+
     }
     else { //probably a deleted file, so move to next record
       loopFiles(x+1, filesData, user, callback);
