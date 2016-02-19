@@ -6,49 +6,34 @@ require("dotenv").load({path: './.env'});
 
 exports.LogError = function(error, email) {
 
-  PushToSNS(error, function(snsErr, snsData) {
-    if (snsErr)
-      throw('Error in LogError.PushToSNS: ' + snsErr);
+  //send an error email to the admin
+  SendUserEmail(error, process.env.admin_email, function(emailErr, emailData) {
+    if (emailErr)
+      throw('Error in LogError.SendUserEmail: ' + emailErr);
 
-    console.log('PushToSNS data: ' + JSON.stringify(snsData));
-
-    if (email != undefined) {
-      SendUserEmail(error, email, function(emailErr, emailData) {
-        if (emailErr)
-          throw('Error in LogError.SendUserEmail: ' + emailErr);
-
-        console.log(emailData);
-      });
-    }
-
+    console.log(emailData);
   });
+
+  //send an error email to the user
+  if (email != undefined) {
+    SendUserEmail(error, email, function(emailErr, emailData) {
+      if (emailErr)
+        throw('Error in LogError.SendUserEmail: ' + emailErr);
+
+      console.log(emailData);
+    });
+  }
 
 };
 
-function PushToSNS(error, callback) {
-  console.log('Pushing an error to SNS: ' + error);
-
-  var sns = new AWS.SNS();
-  sns.publish({
-     TopicArn: 'arn:aws:sns:us-east-1:420261107226:Dropbox_Evernote_Error_Email',
-     Subject: 'Error ' + arguments.callee.caller.name,
-     Message: error
-  }, function(err, data) {
-      if (err) {
-          throw('Error pushing error messge to SNS: ' + err);
-      }
-      console.log('Error message pushed to SNS');
-      callback(null, data);
-  });
-}
-
 function SendUserEmail(error, email, callback) {
-  if (email == '' || email == undefined)
-    throw('Invalid email, exiting LogError.SendUserEmail');
+
+  var ses = new AWS.SES();
 
   console.log('Sending an error email to the user: ' + email);
 
-  var ses = new AWS.SES();
+  if (email == '' || email == undefined)
+    throw('Invalid email, exiting LogError.SendUserEmail');
 
   var to = [email];
   var from = process.env.admin_email;
@@ -57,11 +42,11 @@ function SendUserEmail(error, email, callback) {
      Destination: { ToAddresses: to },
      Message: {
          Subject: {
-            Data: 'Error ' + arguments.callee.caller.name
+            Data: 'Gnotes Error ' + arguments.callee.caller.name
          },
          Body: {
              Text: {
-                 Data: 'An error occurred with Gnotes:\n\n' + error
+                 Data: 'An error occurred with Gnotes:\n\n' + error + '\n\nYou can reply to this email for support.'
              }
           }
      }
