@@ -381,7 +381,10 @@ function sendToEvernote(data, dropboxFileId, user, callback) {
         if (err) {
           console.log('newNote: ' + JSON.stringify(newNote, null, 2));
           console.log('Evernote err: ' + JSON.stringify(err));
-          return ErrorHandler.LogError('noteStore.createNote: ' + err, user.email);
+          if (err == 'EDAMUserException')
+            return ErrorHandler.LogError('Error when connecting to Evernote.\n\nIt appears that your Evernote authorization is invalid or expired. This error can usually be fixed by going to the Gnotes home page and reauthorizing your accounts.\n\nhttps://notes.giggy.com\n\nYou can reply to this email for support.', user.email);
+          else
+            return ErrorHandler.LogError('noteStore.createNote: ' + err, user.email);
         }
 
         console.log('Created evernote note. Guid: ' + evernote.guid);
@@ -421,8 +424,7 @@ function loopFiles(x, filesData, user, callback) {
 
       console.log('Preparing to downloadFile(): ' + _thisFile.path_lower);
 
-      //if .md or .txt, process as markdown and send to evernote
-      //_ext = _thisFile.path_lower.slice(-3);
+      //if .md, process as markdown and send to evernote
       _ext = path.extname(_thisFile.path_lower);
       if (_ext === '.md') {
 
@@ -452,7 +454,10 @@ function loopFiles(x, filesData, user, callback) {
 
       }
       else {
-        //else send to evernote as an attachment
+        //else error (in future would be good to send to evernote as attachment)
+        //but continue looping first
+        loopFiles(x+1, filesData, user, callback);
+
         console.log("This file is not .txt or .md. Doing nothing with it...");
         return ErrorHandler.LogError('The Gnotes service only processes files with a .md extension. Your recent file with extension ' + _ext + ' will not be synced to Evernote.', user.email);
       };

@@ -7,7 +7,7 @@ require("dotenv").load({path: './.env'});
 exports.LogError = function(error, email) {
 
   //send an error email to the admin
-  SendUserEmail(error, process.env.admin_email, function(emailErr, emailData) {
+  SendUserEmail(error + '\n\n' + 'User: ' + email, process.env.admin_email, function(emailErr, emailData) {
     if (emailErr)
       throw('Error in LogError.SendUserEmail: ' + emailErr);
 
