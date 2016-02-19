@@ -427,7 +427,9 @@ function loopFiles(x, filesData, user, callback) {
         }
 
         //if .md or .txt, process as markdown and send to evernote
-        _ext = _thisFile.path_lower.slice(-3);
+        //_ext = _thisFile.path_lower.slice(-3);
+        var path = require('path');
+        _ext = path.extname(_thisFile.path_lower);
         if (_ext === 'txt' || _ext === '.md') {
 
           console.log('Preparing to enter sendToEvernote()');
