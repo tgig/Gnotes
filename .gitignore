@@ -1,0 +1,4 @@
+.env
+lambda/runtime
+lambda/zipped_lambda
+node_modules
