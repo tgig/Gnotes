@@ -24,6 +24,12 @@ function zipFiles(callback) {
   console.log('# zipFiles: cd ' + runtimeDir + '; zip -roq ' + zipDir + moduleName + '.zip .');
   //throw('done');
 
+  //if zipDir does not exist, create it
+  try {
+    exec('cd ' + runtimeDir + '; mkdir ' + zipDir);
+  }
+  catch(err) { /*nothing*/ }
+
   exec('cd ' + runtimeDir + '; zip -roq ' + zipDir + moduleName + '.zip .', function(err, stdout, stderr) {
     if (err) {
       throw('Error when zipping files to zipped_lambda dir: ' + err);
@@ -50,7 +56,7 @@ runtime.copyLambda(runtimeDir, zipDir, moduleName, function(err) {
 
     //now upload the zip file to AWS and publish
     //aws lambda update-function-code --function-name "DB-retrieve-token" --zip-file fileb://bin/zipped_lambda/module-db-get-auth-token.zip --publish
-    exec('aws lambda update-function-code --function-name "' + moduleName + '" --zip-file fileb://zipped_lambda/' + moduleName + '.zip --publish', function(err, stdout, stderr) {
+    exec('aws lambda update-function-code --function-name "' + moduleName + '" --zip-file fileb://zipped_lambda/' + moduleName + '.zip --publish --region us-east-1', function(err, stdout, stderr) {
       if (err) {
         throw('Error when transferring zip file to AWS: ' + err);
       }

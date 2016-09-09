@@ -286,7 +286,7 @@ function parseNote(content) {
 
   //remove line breaks
   try {
-    note.title = note.title.replace(/(\r\n|\n|\r)/gm,"");
+    note.title = note.title.trim().replace(/(\r\n|\n|\r)/gm,"");
   }
   catch (e) {
     return ErrorHandler.LogError('error when replacing note.title line breaks: ' + e);
@@ -315,10 +315,16 @@ function sendToEvernote(data, dropboxFileId, user, callback) {
 
   //convert markdown to HTML
   if (note.body != undefined) {
+    //remove < and > signs and replace with &lt; and &gt;
+    //needs to happen before markdown replacement
+    note.body = note.body.replace(new RegExp('<', 'g'), '&lt;');
+    note.body = note.body.replace(new RegExp('>', 'g'), '&gt;');;
+
     note.body = marked(note.body);
 
     //remove id tags (which were inserted by the marked() function)
     note.body = note.body.replace(new RegExp(' id="[^\"]*"', 'g'), '');
+
 
   }
 
@@ -327,6 +333,7 @@ function sendToEvernote(data, dropboxFileId, user, callback) {
 
   var newNote = new Evernote.Note();
   newNote.title = note.title;
+  newNote.tagNames = note.tags;
   newNote.content = nBodyHead + note.body + nBodyFoot;
 
 
@@ -375,16 +382,19 @@ function sendToEvernote(data, dropboxFileId, user, callback) {
     else { //insert new note
 
       console.log('creating new file.');
+      console.log('----');
+      console.log(JSON.stringify(newNote));
+      console.log('----');
 
       //attempt to create note in evernote account
       noteStore.createNote(newNote, function(err, evernote) {
         if (err) {
           console.log('newNote: ' + JSON.stringify(newNote, null, 2));
           console.log('Evernote err: ' + JSON.stringify(err));
-          if (err == 'EDAMUserException')
-            return ErrorHandler.LogError('Error when connecting to Evernote.\n\nIt appears that your Evernote authorization is invalid or expired. This error can usually be fixed by going to the Gnotes home page and reauthorizing your accounts.\n\nhttps://notes.giggy.com\n\nYou can reply to this email for support.', user.email);
-          else
-            return ErrorHandler.LogError('noteStore.createNote: ' + err, user.email);
+          //if (err == 'EDAMUserException')
+          //  return ErrorHandler.LogError('Error when connecting to Evernote.\n\nIt appears that your Evernote authorization is invalid or expired. This error can usually be fixed by going to the Gnotes home page and reauthorizing your accounts.\n\nhttps://notes.giggy.com\n\nYou can reply to this email for support.', user.email);
+          //else
+          return ErrorHandler.LogError('noteStore.createNote: ' + err, user.email);
         }
 
         console.log('Created evernote note. Guid: ' + evernote.guid);
@@ -412,6 +422,8 @@ function sendToEvernote(data, dropboxFileId, user, callback) {
 
 function loopFiles(x, filesData, user, callback) {
 
+  var sns = new AWS.SNS();
+
   console.log('Entering loopFiles()');
   console.log('filesData.entries.length: ' + filesData.entries.length);
   console.log('x: ' + x);
@@ -426,7 +438,25 @@ function loopFiles(x, filesData, user, callback) {
 
       //if .md, process as markdown and send to evernote
       _ext = path.extname(_thisFile.path_lower);
-      if (_ext === '.md') {
+      if (_ext === '.md' || _ext === '.txt') {
+
+
+
+
+        //push to SNS so it can be processed and pushed to Evernote
+        sns.publish({
+           TopicArn: 'arn:aws:sns:us-east-1:420261107226:Evernote_File_Update',
+           Message: JSON.stringify(user)
+        }, function(err, data) {
+            if (err) {
+                return ErrorHandler.LogError(err);
+            }
+            console.log('published user to SNS topic Evernote_File_Update');
+            console.log('data: \n---' + data + '---');
+        });
+
+
+
 
 
         //call dropbox and retrieve file
@@ -459,7 +489,7 @@ function loopFiles(x, filesData, user, callback) {
         loopFiles(x+1, filesData, user, callback);
 
         console.log("This file is not .txt or .md. Doing nothing with it...");
-        return ErrorHandler.LogError('The Gnotes service only processes files with a .md extension. Your recent file with extension ' + _ext + ' will not be synced to Evernote.', user.email);
+        return ErrorHandler.LogError('The Gnotes service only processes files with a .txt or .md extension. Your recent file with extension ' + _ext + ' will not be synced to Evernote.', user.email);
       };
 
     }
