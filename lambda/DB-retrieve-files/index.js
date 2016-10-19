@@ -394,7 +394,7 @@ function sendToEvernote(data, dropboxFileId, user, callback) {
           //if (err == 'EDAMUserException')
           //  return ErrorHandler.LogError('Error when connecting to Evernote.\n\nIt appears that your Evernote authorization is invalid or expired. This error can usually be fixed by going to the Gnotes home page and reauthorizing your accounts.\n\nhttps://notes.giggy.com\n\nYou can reply to this email for support.', user.email);
           //else
-          return ErrorHandler.LogError('noteStore.createNote: ' + err, user.email);
+          return ErrorHandler.LogError('noteStore.createNote: ' + err + '\n' + JSON.stringify(err), user.email);
         }
 
         console.log('Created evernote note. Guid: ' + evernote.guid);
