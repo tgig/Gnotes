@@ -2,3 +2,4 @@
 lambda/runtime
 lambda/zipped_lambda
 node_modules
+.DS_Store
