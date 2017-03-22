@@ -11,9 +11,10 @@ var Evernote = require('evernote').Evernote;
 require("dotenv").load({path: './.env'});
 var ErrorHandler = require('./shared/error-handler');
 
-exports.handler = function(event, context) {
+exports.handler = function(event, context, callback) {
   main(event.code, function (err, returnData) {
-    context.succeed(returnData);
+    context.callbackWaitsForEmptyEventLoop = false; 
+    callback(null, returnData);
   });
 }
 

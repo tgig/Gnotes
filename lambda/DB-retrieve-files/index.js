@@ -20,7 +20,7 @@ marked.setOptions({
 
 var dynamodb = new AWS.DynamoDB();
 
-exports.handler = function(event, context) {
+exports.handler = function(event, context, callback) {
 
   console.log('Calling main(), event: ' + JSON.stringify(event));
 
@@ -29,9 +29,8 @@ exports.handler = function(event, context) {
       return ErrorHandler.LogError(err);
     }
 
-    context.succeed(data);
-
-    context.done( );
+    context.callbackWaitsForEmptyEventLoop = false; 
+    callback(null, data);
 
   });
 

@@ -19,14 +19,15 @@ var Evernote = require('evernote').Evernote;
 require("dotenv").load();
 var ErrorHandler = require('./shared/error-handler');
 
-exports.handler = function(event, context) {
+exports.handler = function(event, context, callback) {
   if (!event.dropboxUserId || !event.oauthToken || !event.oauthSecret || !event.oauthVerifier) {
     console.log('event: ' + JSON.stringify(event, null, 2));
     throw(new Error("function expects appropriate data to be passed in"));
   }
 
   main(event.dropboxUserId, event.oauthToken, event.oauthSecret, event.oauthVerifier, function (err, data) {
-    context.succeed({"success": "success"});
+    context.callbackWaitsForEmptyEventLoop = false; 
+    callback(null, "success");
   });
 }
 
