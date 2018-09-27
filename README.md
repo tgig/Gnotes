@@ -1,3 +1,10 @@
+# Defunked
+
+GNotes is no longer active. Evernote decided my implementation was no bueno and disconnected it. I don't currently have the time to update the API, so GNotes will be non-functional until I come up for air... maybe never.
+
+If you want to get it going again, read Issue #8 and submit a pull request.
+
+
 # Gnotes
 
 Basically, I really like Evernote. But I don't like the interface to Evernote. As a coder, I like the interface to Atom, Sublime Text, and iTerm.
